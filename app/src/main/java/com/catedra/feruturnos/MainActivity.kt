@@ -4,91 +4,52 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.runtime.Composable
+import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.catedra.feruturnos.ui.auth.AuthScreen
+import com.catedra.feruturnos.ui.auth.AuthState
+import com.catedra.feruturnos.ui.auth.AuthViewModel
+import com.catedra.feruturnos.ui.navigation.AppNavigation
 import com.catedra.feruturnos.ui.theme.FeruTurnosTheme
 
+/**
+ * Activity contenedora principal.
+ * Su única responsabilidad es inicializar el árbol de composables.
+ * No modificar este archivo.
+ */
 class MainActivity : ComponentActivity() {
+
+    private val authViewModel: AuthViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             FeruTurnosTheme {
-                FeruTurnosApp()
-            }
-        }
-    }
-}
-
-@PreviewScreenSizes
-@Composable
-fun FeruTurnosApp() {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
-
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            AppDestinations.entries.forEach {
-                item(
-                    icon = {
-                        Icon(
-                            it.icon,
-                            contentDescription = it.label
+                val authState by
+                authViewModel.authState.collectAsStateWithLifecycle()
+                // when sobre el estado de autenticacion:
+                // el compilador garantiza que todos los casos estan cubiertos
+                when (authState) {
+                    is AuthState.NoAutenticado, is AuthState.Error -> {
+                        AuthScreen(
+                            authState = authState,
+                            onIniciarSesion = { email, password ->
+                                authViewModel.iniciarSesion(email, password)
+                            },
+                            onRegistrar = { email, password ->
+                                authViewModel.registrar(email, password)
+                            }
                         )
-                    },
-                    label = { Text(it.label) },
-                    selected = it == currentDestination,
-                    onClick = { currentDestination = it }
-                )
+                    }
+                    is AuthState.Autenticado -> {
+                        AppNavigation(
+                            onCerrarSesion = { authViewModel.cerrarSesion() }
+                        )
+                    }
+                }
             }
         }
-    ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
-            )
-        }
-    }
-}
-
-enum class AppDestinations(
-    val label: String,
-    val icon: ImageVector,
-) {
-    HOME("Home", Icons.Default.Home),
-    FAVORITES("Favorites", Icons.Default.Favorite),
-    PROFILE("Profile", Icons.Default.AccountBox),
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    FeruTurnosTheme {
-        Greeting("Android")
     }
 }

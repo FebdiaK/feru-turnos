@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "864735497646",
+    "project_id": "feru-turnos",
+    "storage_bucket": "feru-turnos.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:864735497646:android:a8073526e94e28cc66cc3f",
+        "android_client_info": {
+          "package_name": "com.catedra.feruturnos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQTrEWaFlyZuMb0k_0NpClJS5N2-iCEHs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
