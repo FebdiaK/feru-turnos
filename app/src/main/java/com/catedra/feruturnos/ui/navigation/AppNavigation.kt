@@ -27,6 +27,7 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * Definición de rutas de navegación.
@@ -132,4 +133,12 @@ fun AppNavigation(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AppNavigationPreview() {
+    AppNavigation(
+        onCerrarSesion = {}
+    )
 }
