@@ -14,6 +14,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.catedra.feruturnos.ui.detalle.DetalleScreen
 import com.catedra.feruturnos.ui.home.HomeScreen
+import com.catedra.feruturnos.ui.search.SearchScreen
+import com.catedra.feruturnos.ui.profile.ProfileScreen
 import com.catedra.feruturnos.ui.peliculas.PeliculasScreen
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.padding
@@ -39,6 +41,8 @@ import androidx.compose.ui.tooling.preview.Preview
 object Rutas {
 
     const val HOME = "Inicio"
+    const val SEARCH = "Búsqueda"
+    const val PROFILE = "Perfil"
     const val PELICULAS = "peliculas"
     const val DETALLE   = "detalle/{peliculaId}"
 
@@ -69,6 +73,8 @@ fun AppNavigation(
 
     val tituloActual = when (rutaActual) {
         Rutas.HOME -> "Inicio"
+        Rutas.SEARCH -> "Búsqueda"
+        Rutas.PROFILE -> "Perfil"
         Rutas.PELICULAS -> "Películas"
         Rutas.DETALLE -> "Detalle"
         else -> "FERU Turnos"
@@ -96,47 +102,41 @@ fun AppNavigation(
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = MaterialTheme.colorScheme.primary,
                         selectedTextColor = MaterialTheme.colorScheme.primary,
-
                         unselectedIconColor = Color.White,
                         unselectedTextColor = Color.White,
-
-                        indicatorColor = MaterialTheme.colorScheme.secondary
+                        indicatorColor = Color.Transparent
                     )
                 )
 
                 NavigationBarItem(
-                    selected = rutaActual == Rutas.PELICULAS,
+                    selected = rutaActual == Rutas.SEARCH,
                     onClick = {
-                        navController.navigate(Rutas.PELICULAS)
+                        navController.navigate(Rutas.SEARCH)
                     },
                     icon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    label = { Text("Búsquedas") },
+                    label = { Text("Búsqueda") },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = MaterialTheme.colorScheme.primary,
                         selectedTextColor = MaterialTheme.colorScheme.primary,
-
                         unselectedIconColor = Color.White,
                         unselectedTextColor = Color.White,
-
-                        indicatorColor = MaterialTheme.colorScheme.secondary
+                        indicatorColor = Color.Transparent
                     )
                 )
 
                 NavigationBarItem(
-                    selected = false/**selectedTab == 2**/,
+                    selected = rutaActual == Rutas.PROFILE,
                     onClick = {
-                        navController.navigate(Rutas.PELICULAS)
+                        navController.navigate(Rutas.PROFILE)
                     },
                     icon = { Icon(Icons.Default.Person, contentDescription = null) },
                     label = { Text("Perfil") },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = MaterialTheme.colorScheme.primary,
                         selectedTextColor = MaterialTheme.colorScheme.primary,
-
                         unselectedIconColor = Color.White,
                         unselectedTextColor = Color.White,
-
-                        indicatorColor = MaterialTheme.colorScheme.secondary
+                        indicatorColor = Color.Transparent
                     )
                 )
             }
@@ -152,6 +152,16 @@ fun AppNavigation(
                 HomeScreen()
             }
 
+            composable(Rutas.SEARCH) {
+                SearchScreen()
+            }
+
+            composable(Rutas.PROFILE) {
+                ProfileScreen()
+            }
+
+
+            /**
             composable(Rutas.PELICULAS) {
                 PeliculasScreen(
                     onNavegar = { id ->
@@ -173,6 +183,7 @@ fun AppNavigation(
                     onVolver = { navController.popBackStack() }
                 )
             }
+            **/
         }
     }
 }

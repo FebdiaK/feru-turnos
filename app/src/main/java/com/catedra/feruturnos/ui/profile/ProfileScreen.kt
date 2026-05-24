@@ -1,4 +1,4 @@
-package com.catedra.feruturnos.ui.home
+package com.catedra.feruturnos.ui.profile
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -10,18 +10,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
-fun HomeScreen() {
+fun ProfileScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        Text("Pantalla de inicio")
+        Text("Pantalla de perfil")
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
-    HomeScreen()
+fun ProfileScreenPreview() {
+    ProfileScreen()
 }
