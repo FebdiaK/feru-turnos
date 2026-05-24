@@ -20,10 +20,15 @@ import com.catedra.feruturnos.ui.peliculas.PeliculasScreen
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.TopAppBarColors
@@ -70,6 +75,7 @@ fun AppNavigation(
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val rutaActual = backStackEntry?.destination?.route
+    val mostrarVolver = rutaActual != Rutas.HOME
 
     val tituloActual = when (rutaActual) {
         Rutas.HOME -> "Inicio"
@@ -86,8 +92,49 @@ fun AppNavigation(
                 title = { Text(tituloActual) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White
-                )
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
+                ),
+                navigationIcon = {
+                    if (mostrarVolver) {
+                        IconButton(
+                            onClick = { navController.popBackStack() }
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Volver"
+                            )
+                        }
+                    }
+                },
+
+                actions = {
+                    when (rutaActual) {
+                        Rutas.PROFILE -> {
+                            IconButton( onClick = onCerrarSesion ) {
+                                Icon(
+                                    Icons.Default.ExitToApp,
+                                    contentDescription = "Cerrar sesión"
+                                )
+                            }
+                        }
+                    }
+
+                    IconButton(onClick = { }) {
+                        Icon(
+                            Icons.Default.Notifications,
+                            contentDescription = "Notificaciones"
+                        )
+                    }
+
+                    IconButton(onClick = { }) {
+                        Icon(
+                            Icons.Default.AccountCircle,
+                            contentDescription = "Perfil"
+                        )
+                    }
+                }
             )
         },
         bottomBar = {
