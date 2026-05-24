@@ -1,5 +1,8 @@
 package com.catedra.feruturnos.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -7,16 +10,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.catedra.feruturnos.ui.detalle.DetalleScreen
 import com.catedra.feruturnos.ui.home.HomeScreen
 import com.catedra.feruturnos.ui.search.SearchScreen
 import com.catedra.feruturnos.ui.profile.ProfileScreen
-import com.catedra.feruturnos.ui.peliculas.PeliculasScreen
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -31,12 +30,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.window.Dialog
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
+import androidx.compose.ui.unit.dp
 
 /**
  * Definición de rutas de navegación.
@@ -72,7 +80,7 @@ fun AppNavigation(
     onCerrarSesion: () -> Unit
 ) {
     val navController = rememberNavController()
-
+    var mostrarDialogoCerrarSesion by remember { mutableStateOf(false) }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val rutaActual = backStackEntry?.destination?.route
     val mostrarVolver = rutaActual != Rutas.HOME
@@ -112,7 +120,7 @@ fun AppNavigation(
                 actions = {
                     when (rutaActual) {
                         Rutas.PROFILE -> {
-                            IconButton( onClick = onCerrarSesion ) {
+                            IconButton( onClick = { mostrarDialogoCerrarSesion = true} ) {
                                 Icon(
                                     Icons.Default.ExitToApp,
                                     contentDescription = "Cerrar sesión"
@@ -189,6 +197,61 @@ fun AppNavigation(
             }
         }
     ) { padding ->
+
+        if (mostrarDialogoCerrarSesion) {
+            Dialog(
+                onDismissRequest = { mostrarDialogoCerrarSesion = false }
+            ) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 0.dp),
+                    shape = RoundedCornerShape(0.dp),
+                    color = Color.White
+                ) {
+                    Column (
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Cerrar sesión",
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+
+                            IconButton(
+                                onClick = { mostrarDialogoCerrarSesion = false },
+                                modifier = Modifier.align(Alignment.CenterEnd)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Cancelar"
+                                )
+                            }
+                        }
+
+                        Text(
+                            text = "¿Seguro que querés cerrar sesión?",
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(top = 16.dp, bottom = 24.dp)
+                        )
+
+                        Button (
+                            onClick = {
+                                mostrarDialogoCerrarSesion = false
+                                onCerrarSesion()
+                            },
+                                    modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Text("Confirmar")
+                        }
+                    }
+                }
+            }
+        }
 
         NavHost(
             navController = navController,
