@@ -19,11 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
@@ -75,27 +77,67 @@ fun AppNavigation(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(tituloActual) }
+                title = { Text(tituloActual) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = Color.White
+                )
             )
         },
         bottomBar = {
-            NavigationBar {
+            NavigationBar (containerColor = MaterialTheme.colorScheme.tertiary){
                 NavigationBarItem(
-                    selected = false,
+                    selected = rutaActual == Rutas.HOME,
                     onClick = {
                         navController.navigate(Rutas.HOME)
                     },
                     icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                    label = { Text("Inicio") }
+                    label = { Text("Inicio") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+
+                        unselectedIconColor = Color.White,
+                        unselectedTextColor = Color.White,
+
+                        indicatorColor = MaterialTheme.colorScheme.secondary
+                    )
                 )
 
                 NavigationBarItem(
-                    selected = false,
+                    selected = rutaActual == Rutas.PELICULAS,
                     onClick = {
                         navController.navigate(Rutas.PELICULAS)
                     },
-                    icon = { Icon(Icons.Default.Movie, contentDescription = null) },
-                    label = { Text("Películas") }
+                    icon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    label = { Text("Búsquedas") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+
+                        unselectedIconColor = Color.White,
+                        unselectedTextColor = Color.White,
+
+                        indicatorColor = MaterialTheme.colorScheme.secondary
+                    )
+                )
+
+                NavigationBarItem(
+                    selected = false/**selectedTab == 2**/,
+                    onClick = {
+                        navController.navigate(Rutas.PELICULAS)
+                    },
+                    icon = { Icon(Icons.Default.Person, contentDescription = null) },
+                    label = { Text("Perfil") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+
+                        unselectedIconColor = Color.White,
+                        unselectedTextColor = Color.White,
+
+                        indicatorColor = MaterialTheme.colorScheme.secondary
+                    )
                 )
             }
         }
