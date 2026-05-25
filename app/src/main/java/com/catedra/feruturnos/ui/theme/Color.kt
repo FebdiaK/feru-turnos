@@ -3,7 +3,7 @@ package com.catedra.feruturnos.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val PrimaryFeru = Color(0xFF5D5FEF)
-val SecondaryFeru = Color(0xFFF8F9F1)
+val SecondaryFeru = Color(0xFF7879F1)
 val tertiaryFeru = Color(0xFFA5A6F6)
 
 

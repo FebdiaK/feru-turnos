@@ -152,7 +152,7 @@ fun AppNavigation(
             )
         },
         bottomBar = {
-            NavigationBar (containerColor = MaterialTheme.colorScheme.tertiary){
+            NavigationBar (containerColor = MaterialTheme.colorScheme.secondary){
                 NavigationBarItem(
                     selected = rutaActual == Rutas.HOME,
                     onClick = {
