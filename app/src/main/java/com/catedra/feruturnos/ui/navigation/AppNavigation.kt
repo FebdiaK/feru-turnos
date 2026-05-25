@@ -1,5 +1,6 @@
 package com.catedra.feruturnos.ui.navigation
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import com.catedra.feruturnos.ui.profile.ProfileScreen
 import com.catedra.feruturnos.ui.notifications.NotificationsScreen
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
@@ -45,6 +47,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 
 /**
@@ -137,8 +141,16 @@ fun AppNavigation(
 
                     IconButton(onClick = { navController.navigate(Rutas.NOTIFICATIONS) }) {
                         Icon(
-                            Icons.Default.Notifications,
-                            contentDescription = "Notificaciones"
+                            modifier = if (rutaActual == Rutas.NOTIFICATIONS) {
+                                Modifier.shadow(
+                                    elevation = 12.dp,
+                                    shape = CircleShape,
+                                    spotColor = Color.Black
+                                )
+                            } else { Modifier },
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = "Notificaciones",
+                            tint = Color.White
                         )
                     }
 
@@ -158,11 +170,20 @@ fun AppNavigation(
                     onClick = {
                         navController.navigate(Rutas.HOME)
                     },
-                    icon = { Icon(Icons.Default.Home, contentDescription = null) },
+                    icon = { Icon( Icons.Default.Home, contentDescription = null,) },
                     label = { Text("Inicio") },
+                    modifier = if (rutaActual == Rutas.HOME) {
+                        Modifier.shadow(
+                            elevation = 1.dp,
+                            shape = CircleShape,
+                            spotColor = Color.Black
+                        )
+                    } else {
+                        Modifier
+                    },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        selectedIconColor = Color.White,
+                        selectedTextColor = Color.White,
                         unselectedIconColor = Color.White,
                         unselectedTextColor = Color.White,
                         indicatorColor = Color.Transparent
@@ -176,9 +197,18 @@ fun AppNavigation(
                     },
                     icon = { Icon(Icons.Default.Search, contentDescription = null) },
                     label = { Text("Búsqueda") },
+                    modifier = if (rutaActual == Rutas.SEARCH) {
+                        Modifier.shadow(
+                            elevation = 1.dp,
+                            shape = CircleShape,
+                            spotColor = Color.Black
+                        )
+                    } else {
+                        Modifier
+                    },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        selectedIconColor = Color.White,
+                        selectedTextColor = Color.White,
                         unselectedIconColor = Color.White,
                         unselectedTextColor = Color.White,
                         indicatorColor = Color.Transparent
@@ -192,9 +222,18 @@ fun AppNavigation(
                     },
                     icon = { Icon(Icons.Default.Person, contentDescription = null) },
                     label = { Text("Perfil") },
+                    modifier = if (rutaActual == Rutas.PROFILE) {
+                        Modifier.shadow(
+                            elevation = 1.dp,
+                            shape = CircleShape,
+                            spotColor = Color.Black
+                        )
+                    } else {
+                        Modifier
+                    },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        selectedIconColor = Color.White,
+                        selectedTextColor = Color.White,
                         unselectedIconColor = Color.White,
                         unselectedTextColor = Color.White,
                         indicatorColor = Color.Transparent
