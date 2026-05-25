@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import com.catedra.feruturnos.ui.home.HomeScreen
 import com.catedra.feruturnos.ui.search.SearchScreen
 import com.catedra.feruturnos.ui.profile.ProfileScreen
+import com.catedra.feruturnos.ui.notifications.NotificationsScreen
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -56,6 +57,8 @@ object Rutas {
     const val HOME = "Inicio"
     const val SEARCH = "Búsqueda"
     const val PROFILE = "Perfil"
+
+    const val NOTIFICATIONS = "Notificaciones"
     const val PELICULAS = "peliculas"
     const val DETALLE   = "detalle/{peliculaId}"
 
@@ -89,6 +92,9 @@ fun AppNavigation(
         Rutas.HOME -> "Inicio"
         Rutas.SEARCH -> "Búsqueda"
         Rutas.PROFILE -> "Perfil"
+
+        Rutas.NOTIFICATIONS -> "Notificaciones"
+
         Rutas.PELICULAS -> "Películas"
         Rutas.DETALLE -> "Detalle"
         else -> "FERU Turnos"
@@ -129,7 +135,7 @@ fun AppNavigation(
                         }
                     }
 
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = { navController.navigate(Rutas.NOTIFICATIONS) }) {
                         Icon(
                             Icons.Default.Notifications,
                             contentDescription = "Notificaciones"
@@ -270,6 +276,9 @@ fun AppNavigation(
                 ProfileScreen()
             }
 
+            composable(Rutas.NOTIFICATIONS) {
+                NotificationsScreen()
+            }
 
             /**
             composable(Rutas.PELICULAS) {
