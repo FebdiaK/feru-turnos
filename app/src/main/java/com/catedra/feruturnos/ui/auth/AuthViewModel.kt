@@ -51,7 +51,7 @@ class AuthViewModel : ViewModel() {
                     "uid" to uid,
                     "email" to email,
                     "name" to "userName?",
-                    "adress" to "unaCalle?",
+                    "address" to "unaCalle?",
                     "photo" to "unaUri?",
                     "celphone" to 123456790,
                     "fechaRegistro" to FieldValue.serverTimestamp()

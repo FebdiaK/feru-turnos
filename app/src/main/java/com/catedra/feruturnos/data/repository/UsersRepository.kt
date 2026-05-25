@@ -38,7 +38,7 @@ class UsersRepository {
             id = id,
             name = getString("name") ?: return null,
             email = getString("email") ?: return null,
-            adress= getString("adress") ?: return null,
+            address= getString("address") ?: return null,
             photo= getString("photo") ?: return null,
             celphone = getLong("celphone")?.toInt() ?: 0
         )
