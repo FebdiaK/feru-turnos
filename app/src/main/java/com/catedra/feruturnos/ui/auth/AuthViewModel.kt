@@ -9,9 +9,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlin.String
 
 class AuthViewModel : ViewModel() {
     private val auth = Firebase.auth
+    private val db = Firebase.firestore
+
     private val _authState = MutableStateFlow<AuthState>(
         if (auth.currentUser != null) AuthState.Autenticado
         else AuthState.NoAutenticado
@@ -30,7 +40,28 @@ class AuthViewModel : ViewModel() {
     fun registrar(email: String, password: String) {
         viewModelScope.launch {
             try {
-                auth.createUserWithEmailAndPassword(email, password).await()
+                val resultado = auth
+                    .createUserWithEmailAndPassword(email, password)
+                    .await()
+
+                val uid = resultado.user?.uid
+                    ?: throw Exception("No se pudo obtener el ID del usuario")
+
+                val user = hashMapOf(
+                    "uid" to uid,
+                    "email" to email,
+                    "name" to "userName?",
+                    "adress" to "unaCalle?",
+                    "photo" to "unaUri?",
+                    "celphone" to 123456790,
+                    "fechaRegistro" to FieldValue.serverTimestamp()
+                )
+
+                db.collection("users")
+                    .document(uid)
+                    .set(user)
+                    .await()
+
                 _authState.value = AuthState.Autenticado
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Error al crear la cuenta")
