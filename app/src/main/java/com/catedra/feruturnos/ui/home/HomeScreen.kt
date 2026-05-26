@@ -170,6 +170,15 @@ fun OsmMapReservationSection(
     // Es la única fuente de verdad para centrar el mapa — sin defaultCenter hardcodeado.
     var userLocation by remember { mutableStateOf<GeoPoint?>(null) }
 
+    val currentUserMarkerState = rememberMarkerState()
+
+    val userIconDrawable = remember {
+        androidx.core.content.ContextCompat.getDrawable(
+            context,
+            com.catedra.feruturnos.R.drawable.ic_user_location
+        )
+    }
+
     // Inicializar OSMDroid una sola vez
     LaunchedEffect(Unit) {
         Configuration.getInstance().apply {
@@ -301,14 +310,29 @@ fun OsmMapReservationSection(
                         ) {
                             // Marcadores de canchas
                             courtsList.forEach { court ->
+                                val courtMarkerState = rememberMarkerState(
+                                    key = court.name, // O court.id si tuviera uno
+                                    geoPoint = court.location
+                                )
+
                                 Marker(
-                                    state = rememberMarkerState(geoPoint = court.location),
+                                    state = courtMarkerState,
                                     title = court.name,
                                     snippet = "${court.sport} · $${court.pricePerHour}/h",
                                     onClick = {
                                         selectedCourt = court
                                         true
                                     }
+                                )
+                            }
+                            if (userLocation != null) {
+                                currentUserMarkerState.geoPoint = userLocation!!
+                                Marker(
+                                    state = currentUserMarkerState,
+                                    title = "Tu ubicación",
+                                    snippet = "Estás acá",
+                                    icon = userIconDrawable,
+                                    onClick = { true }
                                 )
                             }
                         }
