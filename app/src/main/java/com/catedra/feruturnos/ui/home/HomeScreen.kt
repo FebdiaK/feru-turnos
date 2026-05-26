@@ -11,9 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,10 +22,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
-import com.catedra.feruturnos.ui.navigation.Rutas
-import com.catedra.feruturnos.ui.notifications.Notificacion
-import com.catedra.feruturnos.ui.notifications.NotificacionItem
 
 data class Reservation(
     val reservationName: String,
@@ -42,23 +39,25 @@ fun HomeScreen() {
     )
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().background(Color.LightGray)) {
+        modifier = Modifier.fillMaxSize()) {
         item {
             CurrentReservationSection(
-                titulo = "Reservas actuales",
+                title = "Reservas actuales",
                 reservations = reservations
             )
         }
 
         item {
             NewReservationSection(
-                titulo = "Generar una nueva reserva"
+                title = "Generar una nueva reserva",
+                btnText = "Explorar"
             )
         }
 
         item {
             NewReservationSection(
-                titulo = "Conectar con personas"
+                title = "Conectar con personas",
+                btnText = "Conectar"
             )
         }
 
@@ -67,7 +66,7 @@ fun HomeScreen() {
 
 @Composable
 fun CurrentReservationSection(
-    titulo: String,
+    title: String,
     reservations: List<Reservation>
 ) {
     Column(
@@ -77,24 +76,25 @@ fun CurrentReservationSection(
             .padding(16.dp)
     ) {
         Text(
-            text = titulo,
+            text = title,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Medium
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         reservations.forEach { reservation ->
             ReservationsItem(reservation)
         }
     }
-
+    
     Spacer(modifier = Modifier.height(16.dp))
 }
 
 @Composable
 fun NewReservationSection(
-    titulo: String
+    title: String,
+    btnText: String
 ) {
     Column(
         modifier = Modifier
@@ -103,14 +103,26 @@ fun NewReservationSection(
             .padding(16.dp)
     ) {
         Text(
-            text = titulo,
+            text = title,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Medium
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Text("Contenido de la sección")
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = { },
+            enabled = true,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) { Text(btnText) }
     }
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -120,14 +132,31 @@ fun NewReservationSection(
 fun ReservationsItem(
     reservation: Reservation
 ) {
+    Spacer(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(4.dp)
+    )
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                width = 4.dp,
-                color = MaterialTheme.colorScheme.secondary
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Color.Black,
+                spotColor = MaterialTheme.colorScheme.primary
             )
-            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .background(
+                color = Color.White,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = Color.White,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(16.dp)
     ) {
         Text(
             text = "${reservation.reservationName} ",
@@ -141,7 +170,7 @@ fun ReservationsItem(
     Spacer(
         modifier = Modifier
             .fillMaxWidth()
-            .height(16.dp)
+            .height(4.dp)
     )
 }
 
