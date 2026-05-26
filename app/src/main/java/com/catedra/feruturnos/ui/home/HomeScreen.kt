@@ -48,9 +48,7 @@ import com.catedra.feruturnos.data.model.hardcodedCourts
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
 import com.utsman.osmandcompose.DefaultMapProperties
 import com.utsman.osmandcompose.Marker
 import com.utsman.osmandcompose.OpenStreetMap
@@ -305,7 +303,8 @@ fun OsmMapReservationSection(
                             cameraState = cameraState,
                             properties = DefaultMapProperties.copy(
                                 isTilesScaledToDpi = true,
-                                zoomButtonVisibility = ZoomButtonVisibility.NEVER
+                                isMultiTouchControls = true,
+                                zoomButtonVisibility = ZoomButtonVisibility.SHOW_AND_FADEOUT
                             )
                         ) {
                             // Marcadores de canchas
