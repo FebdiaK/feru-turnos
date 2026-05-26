@@ -68,4 +68,12 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     // Add the dependencies for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
+    // 1. El motor core de OpenStreetMap
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
+    // 2. La libreria de OpenStreetMap para Compose
+    implementation("tech.utsmankece:osm-android-compose:0.0.5")
+    // Servicios de ubicación de Google (Para el GPS)
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    // Permisos en Compose
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
 }

@@ -99,6 +99,7 @@ fun AuthScreen(
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 16.dp),
                 textAlign = TextAlign.Center
+
             )
         }
     }
