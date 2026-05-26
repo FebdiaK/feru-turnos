@@ -82,11 +82,11 @@ fun HomeScreen(onNavigateToReservation: (Court) -> Unit = {}) {
             android.Manifest.permission.ACCESS_FINE_LOCATION
         )
 
-        LaunchedEffect(Unit) {
-            if (!locationPermissionState.status.isGranted) {
-                locationPermissionState.launchPermissionRequest()
-            }
-        }
+//        LaunchedEffect(Unit) {
+//            if (!locationPermissionState.status.isGranted) {
+//                locationPermissionState.launchPermissionRequest()
+//            }
+//        }
 
         HomeScreenContent(
             onNavigateToReservation = onNavigateToReservation,
