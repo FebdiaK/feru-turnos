@@ -50,38 +50,18 @@ import androidx.compose.material3.Button
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 
-/**
- * Definición de rutas de navegación.
- * Cada ruta es un string que identifica un destino de forma única.
- * No modificar este objeto.
- */
 object Rutas {
-
     const val HOME = "Inicio"
     const val SEARCH = "Búsqueda"
     const val PROFILE = "Perfil"
-
     const val NOTIFICATIONS = "Notificaciones"
-    const val PELICULAS = "peliculas"
-    const val DETALLE   = "detalle/{peliculaId}"
-
-    /** Construye la ruta de detalle con el id de la película incluido. */
-    fun detalle(id: String) = "detalle/$id"
 }
 
-/**
- * Grafo de navegación de la aplicación.
- *
- * ETAPA 4 DEL LAB: completar los dos bloques TODO.
- *
- * Comparación con el Lab 2A:
- * En el modelo tradicional necesitabas tres pasos para navegar al detalle:
- * instanciar el Fragment, crear la transacción con FragmentManager y commitear.
- * Acá toda la navegación se reduce a navController.navigate(ruta).
- * El back stack lo gestiona el NavController automáticamente.
- */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun AppNavigation(
     onCerrarSesion: () -> Unit
@@ -96,13 +76,14 @@ fun AppNavigation(
         Rutas.HOME -> "Inicio"
         Rutas.SEARCH -> "Búsqueda"
         Rutas.PROFILE -> "Perfil"
-
         Rutas.NOTIFICATIONS -> "Notificaciones"
-
-        Rutas.PELICULAS -> "Películas"
-        Rutas.DETALLE -> "Detalle"
         else -> "FERU Turnos"
     }
+
+    // Estado del permiso de ubicación para pasárselo a la SearchScreen
+    val locationPermissionState = rememberPermissionState(
+        android.Manifest.permission.ACCESS_FINE_LOCATION
+    )
 
     Scaffold(
         topBar = {
@@ -154,7 +135,9 @@ fun AppNavigation(
                         )
                     }
 
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = {
+                        if (rutaActual != Rutas.PROFILE) navController.navigate(Rutas.PROFILE)
+                    }) {
                         Icon(
                             Icons.Default.AccountCircle,
                             contentDescription = "Perfil"
@@ -304,11 +287,24 @@ fun AppNavigation(
             modifier = Modifier.padding(padding)
         ) {
             composable(Rutas.HOME) {
-                HomeScreen()
+                HomeScreen(
+                    onNavigateToSearch = {
+                        navController.navigate(Rutas.SEARCH)
+                    },
+                    onNavigateToReservation = { court ->
+                        // Todo: Implementar cuando exista la pantalla de reservas
+                    }
+                )
             }
 
             composable(Rutas.SEARCH) {
-                SearchScreen()
+                SearchScreen(
+                    onNavigateToReservation = { court ->
+                        // Todo: Implementar cuando exista la pantalla de reservas
+                    },
+                    isPermissionGranted = locationPermissionState.status.isGranted,
+                    onRequestPermission = { locationPermissionState.launchPermissionRequest() }
+                )
             }
 
             composable(Rutas.PROFILE) {
@@ -318,30 +314,6 @@ fun AppNavigation(
             composable(Rutas.NOTIFICATIONS) {
                 NotificationsScreen()
             }
-
-            /**
-            composable(Rutas.PELICULAS) {
-                PeliculasScreen(
-                    onNavegar = { id ->
-                        navController.navigate(Rutas.detalle(id))
-                    },
-                    onCerrarSesion = onCerrarSesion
-                )
-            }
-
-            composable(
-                route = Rutas.DETALLE,
-                arguments = listOf(
-                    navArgument("peliculaId") { type = NavType.StringType }
-                )
-            ) { backStackEntry ->
-                val peliculaId = backStackEntry.arguments?.getString("peliculaId") ?: ""
-                DetalleScreen(
-                    peliculaId = peliculaId,
-                    onVolver = { navController.popBackStack() }
-                )
-            }
-            **/
         }
     }
 }
