@@ -2,7 +2,6 @@ package com.catedra.feruturnos.ui.profile
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -13,6 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 
 @Composable
 fun ProfileContent(
@@ -36,7 +40,16 @@ fun ProfileContent(
             )
         }
 
-        Text(text = "Foto: ${profileState.photo}")
+        if (profileState.photo.isNotBlank()) {
+            AsyncImage(
+                model = profileState.photo,
+                contentDescription = "Foto de perfil",
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+        }
 
         Text(
             text = profileState.name,
@@ -66,7 +79,7 @@ fun ProfileContentPreview() {
             name = "Casandra Marisel Elizondo",
             email = "casandra@email.com",
             address = "Berazategui",
-            photo = "foto.jpg",
+            photo = "https://res.cloudinary.com/dmde9k4fp/image/upload/v1779992377/profile_images/oevupbvdxhthn26nuul8.png%22(string)uid%22XEerqfgqjoe0eyodrPxUaoJmxpZ2",
             celphone = 1122334455
         )
     )

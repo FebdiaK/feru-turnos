@@ -17,6 +17,7 @@ import com.catedra.feruturnos.ui.auth.AuthViewModel
 import com.catedra.feruturnos.ui.auth.RegisterScreen
 import com.catedra.feruturnos.ui.navigation.AppNavigation
 import com.catedra.feruturnos.ui.theme.FeruTurnosTheme
+import androidx.compose.ui.platform.LocalContext
 
 class MainActivity : ComponentActivity() {
 
@@ -29,6 +30,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             FeruTurnosTheme {
                 val authState by authViewModel.authState.collectAsStateWithLifecycle()
+                val context = LocalContext.current
 
                 when (authState) {
                     is AuthState.NoAutenticado, is AuthState.Error -> {
@@ -60,7 +62,14 @@ class MainActivity : ComponentActivity() {
                                         celphone,
                                         photoUri
                                         ->
-                                        authViewModel.registrar(email, password, name, celphone, photoUri)
+                                        authViewModel.registrar(
+                                            context = context,
+                                            email = email,
+                                            password = password,
+                                            name = name,
+                                            celphone = celphone,
+                                            photoUri = photoUri
+                                        )
                                     }
                                 )
                             }
