@@ -81,6 +81,8 @@ class AuthViewModel : ViewModel() {
                     "celphone" to celphone,
                     "address" to address,
                     "photo" to photoUrl,
+                    "friends" to emptyList<Map<String, Any>>(),
+                    "stars" to emptyList<Int>(),
                     "fechaRegistro" to FieldValue.serverTimestamp()
                 )
 
