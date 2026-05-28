@@ -54,6 +54,7 @@ class AuthViewModel : ViewModel() {
         password: String,
         name: String,
         celphone: Int,
+        address: String,
         photoUri: Uri?
     ) {
         viewModelScope.launch {
@@ -70,12 +71,15 @@ class AuthViewModel : ViewModel() {
                 } else {
                     ""
                 }
+                val contactId = generarContactIdUnico()
 
                 val usuario = hashMapOf(
                     "uid" to uid,
+                    "contactId" to contactId,
                     "email" to email,
                     "name" to name,
                     "celphone" to celphone,
+                    "address" to address,
                     "photo" to photoUrl,
                     "fechaRegistro" to FieldValue.serverTimestamp()
                 )
@@ -130,6 +134,25 @@ class AuthViewModel : ViewModel() {
 
         val json = JSONObject(responseBody)
         json.getString("secure_url")
+    }
+
+    private suspend fun generarContactIdUnico(): String {
+        repeat(10) {
+            val contactId = (100000..999999).random().toString()
+
+            val existe = db.collection("users")
+                .whereEqualTo("contactId", contactId)
+                .get()
+                .await()
+                .documents
+                .isNotEmpty()
+
+            if (!existe) {
+                return contactId
+            }
+        }
+
+        throw Exception("No se pudo generar un ID único")
     }
 
     fun cerrarSesion() {

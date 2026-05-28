@@ -2,6 +2,7 @@ package com.catedra.feruturnos.ui.profile
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -15,7 +16,13 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 
 @Composable
@@ -45,8 +52,9 @@ fun ProfileContent(
                 model = profileState.photo,
                 contentDescription = "Foto de perfil",
                 modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape),
+                    .size(144.dp)
+                    .clip(CircleShape)
+                    .padding(24.dp),
                 contentScale = ContentScale.Crop
             )
         }
@@ -58,7 +66,7 @@ fun ProfileContent(
             textAlign = TextAlign.Center
         )
         Text(
-            text = "# ${profileState.uid}",
+            text = "# ${profileState.contactId}",
             color = MaterialTheme.colorScheme.tertiary,
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(bottom = 16.dp)
@@ -67,6 +75,23 @@ fun ProfileContent(
         Text(profileState.email)
         Text(profileState.address)
         Text("${profileState.celphone}")
+
+        Text(
+            "Puntuación de 5★",
+            Modifier.padding(16.dp)
+        )
+
+        Button(
+            onClick = {},
+            enabled = true,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = Color.White
+            ),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Contactos")
+        }
     }
 }
 
@@ -75,11 +100,12 @@ fun ProfileContent(
 fun ProfileContentPreview() {
     ProfileContent(
         profileState = ProfileState(
-            uid = "123456",
+            uid = "12gfdfdf34fhdggfd56",
+            contactId = "123456",
             name = "Casandra Marisel Elizondo",
             email = "casandra@email.com",
             address = "Berazategui",
-            photo = "https://res.cloudinary.com/dmde9k4fp/image/upload/v1779992377/profile_images/oevupbvdxhthn26nuul8.png%22(string)uid%22XEerqfgqjoe0eyodrPxUaoJmxpZ2",
+            photo = "https://s3.ppllstatics.com/canarias7/www/multimedia/201704/14/media/cortadas/462076-1g_CSN462076_MG3928385--1248x702.jpg",
             celphone = 1122334455
         )
     )

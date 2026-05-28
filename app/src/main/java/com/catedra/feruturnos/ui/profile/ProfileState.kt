@@ -2,6 +2,7 @@ package com.catedra.feruturnos.ui.profile
 
 data class ProfileState(
     val uid: String = "",
+    val contactId: String = "",
     val name: String = "",
     val email: String = "",
     val address: String = "",

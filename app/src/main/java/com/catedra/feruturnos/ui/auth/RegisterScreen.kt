@@ -29,6 +29,7 @@ fun RegisterScreen(
         password: String,
         name: String,
         celphone: Int,
+        address: String,
         photoUri: Uri?
     ) -> Unit
 ) {
@@ -36,20 +37,22 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var celphoneText by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf("") }
     var photoUri by remember { mutableStateOf<Uri?>(null) }
 
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        photoUri = uri
-    }
+    ) { uri -> photoUri = uri }
 
     val nombreValido = name.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
     val celularValido = celphoneText.length >= 10
     val celphone = celphoneText.toIntOrNull()
+
     val formValido =
         email.isNotBlank() &&
         password.isNotBlank() &&
+        address.isNotBlank() &&
+        photoUri != null &&
         nombreValido &&
         celularValido &&
         celphone != null
@@ -73,6 +76,7 @@ fun RegisterScreen(
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
+        //* NOMBRE */
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
@@ -93,6 +97,7 @@ fun RegisterScreen(
             )
         }
 
+        //* EMAIL */
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -103,6 +108,7 @@ fun RegisterScreen(
                 .padding(bottom = 12.dp)
         )
 
+        //* CONTRASEÑA */
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -113,6 +119,7 @@ fun RegisterScreen(
                 .padding(bottom = 12.dp)
         )
 
+        //* CELULAR */
         OutlinedTextField(
             value = celphoneText,
             onValueChange = { celphoneText = it.filter { char -> char.isDigit() } },
@@ -135,6 +142,17 @@ fun RegisterScreen(
             )
         }
 
+        //* DIRECCIÓN */
+        OutlinedTextField(
+            value = address,
+            onValueChange = { address = it },
+            label = { Text("Ingrese su dirección") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        )
+
+        //* FOTO */
         Button(
             onClick = {
                 photoPicker.launch(
@@ -167,6 +185,7 @@ fun RegisterScreen(
                     password,
                     name,
                     celphone ?: 0,
+                    address,
                     photoUri
                 )
             },

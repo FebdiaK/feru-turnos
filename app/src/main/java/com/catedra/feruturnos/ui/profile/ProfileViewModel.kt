@@ -45,6 +45,7 @@ class ProfileViewModel : ViewModel() {
 
                 _profileState.value = ProfileState(
                     uid = uid,
+                    contactId = document.getString("contactId") ?: "",
                     name = document.getString("name") ?: "",
                     email = document.getString("email") ?: "",
                     address = document.getString("address") ?: "",
