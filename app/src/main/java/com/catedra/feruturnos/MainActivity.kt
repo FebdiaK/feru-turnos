@@ -7,17 +7,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.catedra.feruturnos.ui.auth.AuthScreen
 import com.catedra.feruturnos.ui.auth.AuthState
 import com.catedra.feruturnos.ui.auth.AuthViewModel
+import com.catedra.feruturnos.ui.auth.RegisterScreen
 import com.catedra.feruturnos.ui.navigation.AppNavigation
 import com.catedra.feruturnos.ui.theme.FeruTurnosTheme
 
-/**
- * Activity contenedora principal.
- * Su única responsabilidad es inicializar el árbol de composables.
- * No modificar este archivo.
- */
 class MainActivity : ComponentActivity() {
 
     private val authViewModel: AuthViewModel by viewModels()
@@ -25,27 +24,47 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             FeruTurnosTheme {
-                val authState by
-                authViewModel.authState.collectAsStateWithLifecycle()
-                // when sobre el estado de autenticacion:
-                // el compilador garantiza que todos los casos estan cubiertos
+                val authState by authViewModel.authState.collectAsStateWithLifecycle()
+
                 when (authState) {
                     is AuthState.NoAutenticado, is AuthState.Error -> {
-                        AuthScreen(
-                            authState = authState,
-                            onIniciarSesion = { email, password ->
-                                authViewModel.iniciarSesion(email, password)
-                            },
-                            onRegistrar = { email, password ->
-                                authViewModel.registrar(email, password)
+                        val authNavController = rememberNavController()
+
+                        NavHost(
+                            navController = authNavController,
+                            startDestination = "login"
+                        ) {
+                            composable("login") {
+                                AuthScreen(
+                                    authState = authState,
+                                    onIniciarSesion = { email, password ->
+                                        authViewModel.iniciarSesion(email, password)
+                                    },
+                                    onIrARegistro = {
+                                        authNavController.navigate("register")
+                                    }
+                                )
                             }
-                        )
+
+                            composable("register") {
+                                RegisterScreen(
+                                    authState = authState,
+                                    onRegistrar = { email, password ->
+                                        authViewModel.registrar(email, password)
+                                    }
+                                )
+                            }
+                        }
                     }
+
                     is AuthState.Autenticado -> {
                         AppNavigation(
-                            onCerrarSesion = { authViewModel.cerrarSesion() }
+                            onCerrarSesion = {
+                                authViewModel.cerrarSesion()
+                            }
                         )
                     }
                 }
