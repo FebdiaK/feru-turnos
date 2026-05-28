@@ -1,5 +1,6 @@
 package com.catedra.feruturnos
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -52,8 +53,14 @@ class MainActivity : ComponentActivity() {
                             composable("register") {
                                 RegisterScreen(
                                     authState = authState,
-                                    onRegistrar = { email, password ->
-                                        authViewModel.registrar(email, password)
+                                    onRegistrar = {
+                                        email,
+                                        password,
+                                        name,
+                                        celphone,
+                                        photoUri
+                                        ->
+                                        authViewModel.registrar(email, password, name, celphone, photoUri)
                                     }
                                 )
                             }

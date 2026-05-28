@@ -76,4 +76,5 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
     // Permisos en Compose
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+    implementation("io.coil-kt:coil-compose:2.7.0")
 }

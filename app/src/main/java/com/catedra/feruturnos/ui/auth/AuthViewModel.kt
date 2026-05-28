@@ -1,5 +1,6 @@
 package com.catedra.feruturnos.ui.auth
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
@@ -9,13 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlin.String
 
 class AuthViewModel : ViewModel() {
@@ -37,7 +33,13 @@ class AuthViewModel : ViewModel() {
             }
         }
     }
-    fun registrar(email: String, password: String) {
+    fun registrar(
+        email: String,
+        password: String,
+        name: String,
+        celphone: Int,
+        photoUri: Uri?
+    ) {
         viewModelScope.launch {
             try {
                 val resultado = auth
@@ -47,27 +49,28 @@ class AuthViewModel : ViewModel() {
                 val uid = resultado.user?.uid
                     ?: throw Exception("No se pudo obtener el ID del usuario")
 
-                val user = hashMapOf(
+                val usuario = hashMapOf(
                     "uid" to uid,
                     "email" to email,
-                    "name" to "userName?",
-                    "address" to "unaCalle?",
-                    "photo" to "unaUri?",
-                    "celphone" to 123456790,
+                    "name" to name,
+                    "celphone" to celphone,
+                    "photo" to "",
                     "fechaRegistro" to FieldValue.serverTimestamp()
                 )
 
                 db.collection("users")
                     .document(uid)
-                    .set(user)
+                    .set(usuario)
                     .await()
 
                 _authState.value = AuthState.Autenticado
+
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Error al crear la cuenta")
             }
         }
     }
+
     fun cerrarSesion() {
         auth.signOut()
         _authState.value = AuthState.NoAutenticado
