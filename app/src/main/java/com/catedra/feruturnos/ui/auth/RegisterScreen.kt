@@ -76,7 +76,7 @@ fun RegisterScreen(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text("Ingrese su nombre y apellido") },
+            label = { Text("Ingrese su nombre completo") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
