@@ -19,7 +19,7 @@ import androidx.compose.material3.MaterialTheme
 @Composable
 fun HomeScreen(
     onNavigateToSearch: () -> Unit = {},
-    onNavigateToReservation: (Court) -> Unit = {}
+    onNavigateToReservationDetail: (String) -> Unit = {}
 ) {
     var reservations by remember { mutableStateOf<List<Reservation>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -28,16 +28,24 @@ fun HomeScreen(
 
     LaunchedEffect(uid) {
         if (uid != null) {
-            val result = Firebase.firestore
-                .collection("reservations")
-                .whereArrayContains("participantsId", uid)
-                .get()
-                .await()
+            try {
+                val result = Firebase.firestore
+                    .collection("reservations")
+                    .whereArrayContains("participantsId", uid)
+                    .get()
+                    .await()
 
-            reservations = result.documents.mapNotNull { doc ->
-                doc.toObject(Reservation::class.java)
+                reservations = result.documents.mapNotNull { doc ->
+                    doc.toObject(Reservation::class.java)?.copy(
+                        id = doc.id
+                    )
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                isLoading = false
             }
-
+        } else {
             isLoading = false
         }
     }
@@ -60,7 +68,10 @@ fun HomeScreen(
         item {
             CurrentReservationSection(
                 title = "Reservas actuales",
-                reservations = reservations
+                reservations = reservations,
+                onReservationClick = { reservation ->
+                    onNavigateToReservationDetail(reservation.id)
+                }
             )
         }
 

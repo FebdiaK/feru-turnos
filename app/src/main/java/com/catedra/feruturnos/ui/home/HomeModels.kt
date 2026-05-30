@@ -4,6 +4,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
 
 data class Reservation(
+    val id: String = "",
     val createdAt: Timestamp? = null,
     val creatorId: String = "",
     val enclosureId: String = "",

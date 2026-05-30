@@ -2,6 +2,7 @@ package com.catedra.feruturnos.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -23,7 +24,8 @@ import androidx.compose.ui.draw.clip
 @Composable
 fun CurrentReservationSection(
     title: String,
-    reservations: List<Reservation>
+    reservations: List<Reservation>,
+    onReservationClick: (Reservation) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -53,14 +55,19 @@ fun CurrentReservationSection(
             Spacer(modifier = Modifier.height(12.dp))
 
             reservations.forEach { reservation ->
-                ReservationsItem(reservation)
+                ReservationsItem(
+                    reservation = reservation,
+                    onClick = {
+                        onReservationClick(reservation)
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun ReservationsItem(reservation: Reservation) {
+fun ReservationsItem(reservation: Reservation, onClick: () -> Unit) {
     Spacer(
         modifier = Modifier
             .fillMaxWidth()
@@ -69,6 +76,7 @@ fun ReservationsItem(reservation: Reservation) {
 
     Column(
         modifier = Modifier
+            .clickable { onClick() }
             .fillMaxWidth()
             .shadow(
                 elevation = 8.dp,

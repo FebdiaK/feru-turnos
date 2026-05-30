@@ -48,6 +48,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
+import com.catedra.feruturnos.ui.reservation.ReservationDetailScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -57,6 +58,9 @@ object Rutas {
     const val SEARCH = "Búsqueda"
     const val PROFILE = "Perfil"
     const val NOTIFICATIONS = "Notificaciones"
+    const val RESERVATION_DETAIL = "reservation/{reservationId}"
+
+    fun reservationDetail(id: String) = "reservation/$id"
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -289,9 +293,21 @@ fun AppNavigation(
                     onNavigateToSearch = {
                         navController.navigate(Rutas.SEARCH)
                     },
-                    onNavigateToReservation = { court ->
-                        // Todo: Implementar cuando exista la pantalla de reservas
+                    onNavigateToReservationDetail = { reservationId ->
+                        navController.navigate(Rutas.reservationDetail(reservationId))
                     }
+                )
+            }
+
+            composable(
+                route = Rutas.RESERVATION_DETAIL
+            ) { backStackEntry ->
+
+                val reservationId =
+                    backStackEntry.arguments?.getString("reservationId") ?: ""
+
+                ReservationDetailScreen(
+                    reservationId = reservationId
                 )
             }
 
