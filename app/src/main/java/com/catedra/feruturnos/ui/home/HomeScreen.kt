@@ -6,16 +6,53 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.catedra.feruturnos.data.model.Court
+import androidx.compose.runtime.*
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.tasks.await
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun HomeScreen(
     onNavigateToSearch: () -> Unit = {},
     onNavigateToReservation: (Court) -> Unit = {}
 ) {
-    val reservations = listOf(
-        Reservation("Jueves de fulbo con los pibes", "Jueves 21 de Mayo", "20:30 hs", "Los manzanos"),
-        Reservation("Los del club de Bera", "Viernes 22 de Mayo", "21:30 hs", "Los manzanos"),
-    )
+    var reservations by remember { mutableStateOf<List<Reservation>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    val uid = Firebase.auth.currentUser?.uid
+
+    LaunchedEffect(uid) {
+        if (uid != null) {
+            val result = Firebase.firestore
+                .collection("reservations")
+                .whereArrayContains("participantsId", uid)
+                .get()
+                .await()
+
+            reservations = result.documents.mapNotNull { doc ->
+                doc.toObject(Reservation::class.java)
+            }
+
+            isLoading = false
+        }
+    }
+
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+        return
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()

@@ -93,8 +93,8 @@ fun ReservationsItem(reservation: Reservation) {
             fontWeight = FontWeight.Medium
         )
 
-        Text("${reservation.startDate} - ${reservation.time}")
-        Text(reservation.place)
+        Text("${reservation.reservationDay} a las ${reservation.reservationHour} hs.")
+        Text(reservation.placeName)
     }
 
     Spacer(
