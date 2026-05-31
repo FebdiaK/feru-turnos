@@ -52,6 +52,7 @@ import com.catedra.feruturnos.ui.reservation.ReservationDetailScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.catedra.feruturnos.ui.enclosure.EnclosureDetailScreen
 
 object Rutas {
     const val HOME = "Inicio"
@@ -59,8 +60,9 @@ object Rutas {
     const val PROFILE = "Perfil"
     const val NOTIFICATIONS = "Notificaciones"
     const val RESERVATION_DETAIL = "reservation/{reservationId}"
-
     fun reservationDetail(id: String) = "reservation/$id"
+    const val ENCLOSURE_DETAIL = "enclosure/{enclosureId}"
+    fun enclosureDetail(id: String) = "enclosure/$id"
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -313,11 +315,25 @@ fun AppNavigation(
 
             composable(Rutas.SEARCH) {
                 SearchScreen(
-                    onNavigateToReservation = { court ->
-                        // Todo: Implementar cuando exista la pantalla de reservas
+                    onNavigateToReservation = { enclosure ->
+                        navController.navigate(
+                            Rutas.enclosureDetail(enclosure.id)
+                        )
                     },
                     isPermissionGranted = locationPermissionState.status.isGranted,
                     onRequestPermission = { locationPermissionState.launchPermissionRequest() }
+                )
+            }
+
+            composable(
+                route = Rutas.ENCLOSURE_DETAIL
+            ) { backStackEntry ->
+
+                val enclosureId =
+                    backStackEntry.arguments?.getString("enclosureId") ?: ""
+
+                EnclosureDetailScreen(
+                    enclosureId = enclosureId
                 )
             }
 
