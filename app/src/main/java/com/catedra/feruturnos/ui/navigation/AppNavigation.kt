@@ -79,7 +79,7 @@ fun AppNavigation(
         Rutas.SEARCH -> "Búsqueda"
         Rutas.PROFILE -> "Perfil"
         Rutas.NOTIFICATIONS -> "Notificaciones"
-        else -> "FERU Turnos"
+        else -> "Reserva"
     }
 
     // Estado del permiso de ubicación para pasárselo a la SearchScreen

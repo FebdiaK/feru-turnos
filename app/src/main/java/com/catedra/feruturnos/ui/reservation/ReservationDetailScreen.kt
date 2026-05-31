@@ -23,6 +23,16 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.input.pointer.pointerInput
+import android.location.Geocoder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.util.Locale
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun ReservationDetailScreen(
@@ -30,6 +40,7 @@ fun ReservationDetailScreen(
 ) {
     var reservation by remember { mutableStateOf<Reservation?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var addressText by remember { mutableStateOf("") }
 
     val context = androidx.compose.ui.platform.LocalContext.current
 
@@ -75,7 +86,7 @@ fun ReservationDetailScreen(
     if (r == null) {
         Text(
             text = "No se encontró la reserva",
-            modifier = Modifier.padding(24.dp)
+            modifier = Modifier.padding(36.dp)
         )
         return
     }
@@ -98,25 +109,69 @@ fun ReservationDetailScreen(
             )
         }
 
+        LaunchedEffect(mapPoint) {
+            if (mapPoint != null) {
+                addressText = withContext(Dispatchers.IO) {
+                    try {
+                        val geocoder = Geocoder(context, Locale.getDefault())
+                        val results = geocoder.getFromLocation(
+                            mapPoint.latitude,
+                            mapPoint.longitude,
+                            1
+                        )
+
+                        results?.firstOrNull()?.getAddressLine(0) ?: ""
+                    } catch (e: Exception) {
+                        ""
+                    }
+                }
+            }
+        }
+
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = r.reservationName,
-                style = MaterialTheme.typography.headlineMedium
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.secondary)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = r.placeName,
+                    color = Color.White,
+                    modifier = Modifier.weight(2f)
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = "Ir",
+                    tint = Color.White
+                )
+            }
 
-            Text("Lugar: ${r.placeName}")
-            Text("Cancha: ${r.placeFieldType}")
-            Text("Día: ${r.reservationDay}")
-            Text("Hora: ${r.reservationHour}")
-            Text("Creador: ${r.reservationCreatorName}")
-            Text("Teléfono: ${r.reservationCreatorPhone}")
-            Text("Precio: $${r.placeFieldPrice}")
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+
+                Text(
+                    text = if (addressText.isNotBlank()) {
+                        "Dirección: $addressText"
+                    } else {
+                        "Dirección: cargando..."
+                    }
+                )
+
+                Text("Cancha: ${r.placeFieldType}")
+                Text("Día: ${r.reservationDay}")
+                Text("Hora: ${r.reservationHour} hs")
+                Text("Precio: $${r.placeFieldPrice}")
+
+                Text("Creador de reserva")
+                Text("${r.reservationCreatorName}")
+                Text("${r.reservationCreatorPhone}")
+            }
         }
     }
 }
