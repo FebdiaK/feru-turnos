@@ -32,15 +32,32 @@ fun RegisterScreen(
         photoUri: Uri?
     ) -> Unit
 ) {
+    var isRegistering by remember { mutableStateOf(false) }
+    var ocultarError by remember { mutableStateOf(false) }
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var celphoneText by remember { mutableStateOf("") }
     var photoUri by remember { mutableStateOf<Uri?>(null) }
 
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Error) {
+            isRegistering = false
+            ocultarError = false
+        }
+
+        if (authState is AuthState.Autenticado) {
+            isRegistering = false
+        }
+    }
+
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri -> photoUri = uri }
+    ) { uri ->
+        photoUri = uri
+        ocultarError = true
+    }
 
     val nombreValido = name.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
     val celularValido = celphoneText.length >= 10
@@ -48,11 +65,11 @@ fun RegisterScreen(
 
     val formValido =
         email.isNotBlank() &&
-        password.isNotBlank() &&
-        photoUri != null &&
-        nombreValido &&
-        celularValido &&
-        celphone != null
+                password.isNotBlank() &&
+                photoUri != null &&
+                nombreValido &&
+                celularValido &&
+                celphone != null
 
     Column(
         modifier = Modifier
@@ -73,10 +90,12 @@ fun RegisterScreen(
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
-        //* NOMBRE */
         OutlinedTextField(
             value = name,
-            onValueChange = { name = it },
+            onValueChange = {
+                name = it
+                ocultarError = true
+            },
             label = { Text("Ingrese su nombre completo") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -94,10 +113,13 @@ fun RegisterScreen(
             )
         }
 
-        //* EMAIL */
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                ocultarError = true
+                isRegistering = false
+            },
             label = { Text("Ingrese su email") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier
@@ -105,10 +127,13 @@ fun RegisterScreen(
                 .padding(bottom = 12.dp)
         )
 
-        //* CONTRASEÑA */
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                ocultarError = true
+                isRegistering = false
+            },
             label = { Text("Ingrese su contraseña") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier
@@ -116,10 +141,13 @@ fun RegisterScreen(
                 .padding(bottom = 12.dp)
         )
 
-        //* CELULAR */
         OutlinedTextField(
             value = celphoneText,
-            onValueChange = { celphoneText = it.filter { char -> char.isDigit() } },
+            onValueChange = {
+                celphoneText = it.filter { char -> char.isDigit() }
+                ocultarError = true
+                isRegistering = false
+            },
             label = { Text("Ingrese su celular") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             isError = celphoneText.isNotBlank() && !celularValido,
@@ -139,13 +167,13 @@ fun RegisterScreen(
             )
         }
 
-        //* FOTO */
         Button(
             onClick = {
                 photoPicker.launch(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                 )
             },
+            enabled = !isRegistering,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
@@ -167,6 +195,9 @@ fun RegisterScreen(
 
         Button(
             onClick = {
+                ocultarError = true
+                isRegistering = true
+
                 onRegistrar(
                     email,
                     password,
@@ -175,17 +206,25 @@ fun RegisterScreen(
                     photoUri
                 )
             },
-            enabled = formValido,
+            enabled = formValido && !isRegistering,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Registrarme")
+            if (isRegistering) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text("Registrarme")
+            }
         }
 
-        if (authState is AuthState.Error) {
+        if (authState is AuthState.Error && !ocultarError && !isRegistering) {
             Text(
                 text = authState.mensaje,
                 color = MaterialTheme.colorScheme.error,

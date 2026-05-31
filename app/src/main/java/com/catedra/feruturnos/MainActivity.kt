@@ -62,6 +62,7 @@ class MainActivity : ComponentActivity() {
                                         celphone,
                                         photoUri
                                         ->
+                                        authViewModel.limpiarError()
                                         authViewModel.registrar(
                                             context = context,
                                             email = email,
