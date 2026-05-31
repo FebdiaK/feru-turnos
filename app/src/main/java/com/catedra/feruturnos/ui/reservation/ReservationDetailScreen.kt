@@ -180,25 +180,29 @@ fun ReservationDetailScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            r.participantsId.forEach { participantId ->
-                                Firebase.firestore
-                                    .collection("notifications")
-                                    .add(
-                                        hashMapOf(
-                                            "userId" to participantId,
-                                            "title" to "Nueva reserva",
-                                            "message" to "Fuiste agregado a una reserva de ${r.placeFieldType} en ${r.placeName}",
-                                            "reservationId" to r.id,
-                                            "read" to false,
-                                            "createdAt" to FieldValue.serverTimestamp()
-                                        )
-                                    )
-                                    .await()
+                            val relatedUsers = r.participantsId.map { participantId ->
+                                mapOf(
+                                    "userId" to participantId,
+                                    "read" to false
+                                )
                             }
+
+                            Firebase.firestore
+                                .collection("notifications")
+                                .add(
+                                    hashMapOf(
+                                        "title" to "Nueva reserva",
+                                        "message" to "Fuiste agregado a una reserva de ${r.placeFieldType} en ${r.placeName}",
+                                        "reservationId" to r.id,
+                                        "relatedUsers" to relatedUsers,
+                                        "createdAt" to FieldValue.serverTimestamp()
+                                    )
+                                )
+                                .await()
                         }
                     }
                 ) {
-                    Text("Generar reserva")
+                    Text("Generar notificación")
                 }
             }
         }
@@ -255,22 +259,4 @@ fun FixedReservationMap(
                 }
         )
     }
-}
-
-private suspend fun crearNotificacionDePrueba(
-    reservation: Reservation
-) {
-    Firebase.firestore
-        .collection("notifications")
-        .add(
-            hashMapOf(
-                "userId" to reservation.creatorId,
-                "title" to "Nueva reserva",
-                "message" to "Fuiste agregado a una reserva de ${reservation.placeFieldType} en ${reservation.placeName}",
-                "reservationId" to reservation.id,
-                "read" to false,
-                "createdAt" to FieldValue.serverTimestamp()
-            )
-        )
-        .await()
 }
