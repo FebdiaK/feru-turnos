@@ -20,6 +20,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.catedra.feruturnos.R
+import android.graphics.Bitmap
+import androidx.core.content.FileProvider
+import java.io.File
+import java.io.FileOutputStream
 
 @Composable
 fun RegisterScreen(
@@ -41,6 +45,8 @@ fun RegisterScreen(
     var celphoneText by remember { mutableStateOf("") }
     var photoUri by remember { mutableStateOf<Uri?>(null) }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+
     LaunchedEffect(authState) {
         if (authState is AuthState.Error) {
             isRegistering = false
@@ -57,6 +63,14 @@ fun RegisterScreen(
     ) { uri ->
         photoUri = uri
         ocultarError = true
+    }
+    val cameraPreviewLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        if (bitmap != null) {
+            photoUri = bitmapToUri(context, bitmap)
+            ocultarError = true
+        }
     }
 
     val nombreValido = name.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
@@ -167,18 +181,33 @@ fun RegisterScreen(
             )
         }
 
-        Button(
-            onClick = {
-                photoPicker.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                )
-            },
-            enabled = !isRegistering,
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 12.dp)
+                .padding(bottom = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("Elegir foto")
+            Button(
+                onClick = {
+                    cameraPreviewLauncher.launch(null)
+                },
+                enabled = !isRegistering,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Cámara")
+            }
+
+            Button(
+                onClick = {
+                    photoPicker.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
+                enabled = !isRegistering,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Galería")
+            }
         }
 
         photoUri?.let { uri ->
@@ -234,4 +263,17 @@ fun RegisterScreen(
             )
         }
     }
+}
+
+fun bitmapToUri(
+    context: android.content.Context,
+    bitmap: Bitmap
+): Uri {
+    val file = File(context.cacheDir, "profile_photo_preview.jpg")
+
+    FileOutputStream(file).use { outputStream ->
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+    }
+
+    return Uri.fromFile(file)
 }
