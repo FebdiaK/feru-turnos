@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.osmdroid.util.GeoPoint
 
@@ -49,6 +50,11 @@ fun EnclosureRowItem(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
+            Text(
+                text = enclosure.address,
+                style = MaterialTheme.typography.labelMedium
+            )
+
 
             if (userLocation != null) {
                 val distance = calculateDistance(
@@ -109,6 +115,11 @@ fun SelectedEnclosureCard(
                 }
             }
 
+            Text(
+                text = enclosure.address,
+                style = MaterialTheme.typography.bodySmall
+            )
+
             if (userLocation != null) {
                 val distance = calculateDistance(
                     userLocation,
@@ -124,6 +135,55 @@ fun SelectedEnclosureCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+
+            Text(
+                text = "Servicios",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            if (enclosure.amenities.isEmpty()) {
+                Text(
+                    text = "Sin servicios informados",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            } else {
+                enclosure.amenities.forEach { amenity ->
+                    Text(
+                        text = "✓ ${amenity.replaceFirstChar { it.uppercase() }}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Canchas",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            enclosure.fields.forEach { field ->
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = field.fieldName.replaceFirstChar { it.uppercase() },
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Text(
+                        text = " - ${field.type.replaceFirstChar { it.uppercase() }} - $${field.price}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Button(
                 onClick = onReserve,
                 modifier = Modifier.fillMaxWidth()
@@ -131,5 +191,67 @@ fun SelectedEnclosureCard(
                 Text("Ir a reservar")
             }
         }
+    }
+}
+
+private val previewEnclosure = EnclosureItem(
+    id = "1",
+    name = "Padel Vida Viva",
+    address = "Río Salado 5228, Ezpeleta",
+    location = GeoPoint(
+        -34.7493861,
+        -58.2497394
+    ),
+    phone = 42348888,
+    amenities = listOf(
+        "Estacionamiento",
+        "Buffet",
+        "Vestuarios"
+    ),
+    fields = listOf(
+        FieldItem(
+            id = 0,
+            fieldName = "Cancha número 1",
+            type = "paddel",
+            price = 5000,
+            days = listOf(
+                "sabado",
+                "domingo"
+            ),
+            timeTable = listOf(
+                "10",
+                "11",
+                "14",
+                "15"
+            )
+        )
+    )
+)
+
+private val previewUserLocation = GeoPoint(
+    -34.82,
+    -58.29
+)
+
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFFFFFF
+)
+@Composable
+fun SearchComponentsPreview() {
+    Column {
+        EnclosureRowItem(
+            enclosure = previewEnclosure,
+            userLocation = previewUserLocation,
+            onClick = {}
+        )
+
+        SelectedEnclosureCard(
+            enclosure = previewEnclosure,
+            userLocation = previewUserLocation,
+            onReserve = {},
+            onDismiss = {}
+        )
     }
 }

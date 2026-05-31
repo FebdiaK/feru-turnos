@@ -67,14 +67,62 @@ fun SearchScreen(
                 .await()
 
             enclosures = result.documents.mapNotNull { doc ->
-                val address = doc.getGeoPoint("address")
 
-                if (address != null) {
+                val location = doc.getGeoPoint("location")
+
+                if (location != null) {
+
+                    val amenities =
+                        (doc.get("amenities") as? List<*>)
+                            ?.mapNotNull { it as? String }
+                            ?: emptyList()
+
+                    val fields =
+                        (doc.get("fields") as? List<*>)
+                            ?.mapNotNull { field ->
+
+                                val map = field as? Map<*, *>
+                                    ?: return@mapNotNull null
+
+                                FieldItem(
+                                    id = (map["id"] as? Long)?.toInt() ?: 0,
+                                    fieldName = map["fieldName"] as? String ?: "",
+                                    type = map["type"] as? String ?: "",
+                                    price = map["price"] as? Long ?: 0,
+                                    description = map["description"] as? String ?: "",
+
+                                    days =
+                                        (map["days"] as? List<*>)
+                                            ?.mapNotNull { it as? String }
+                                            ?: emptyList(),
+
+                                    timeTable =
+                                        (map["timeTable"] as? List<*>)
+                                            ?.mapNotNull { it as? String }
+                                            ?: emptyList()
+                                )
+                            }
+                            ?: emptyList()
+
                     EnclosureItem(
                         id = doc.id,
-                        name = doc.getString("name") ?: "Predio sin nombre",
-                        location = GeoPoint(address.latitude, address.longitude)
+                        name = doc.getString("name")
+                            ?: "Predio sin nombre",
+
+                        location = GeoPoint(
+                            location.latitude,
+                            location.longitude
+                        ),
+
+                        address = doc.getString("address") ?: "",
+
+                        phone = doc.getLong("phone") ?: 0,
+
+                        amenities = amenities,
+
+                        fields = fields
                     )
+
                 } else {
                     null
                 }
