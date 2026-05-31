@@ -155,6 +155,12 @@ class AuthViewModel : ViewModel() {
         throw Exception("No se pudo generar un ID único")
     }
 
+    fun limpiarError() {
+        if (_authState.value is AuthState.Error) {
+            _authState.value = AuthState.NoAutenticado
+        }
+    }
+
     fun cerrarSesion() {
         auth.signOut()
         _authState.value = AuthState.NoAutenticado

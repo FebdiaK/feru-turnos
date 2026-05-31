@@ -20,6 +20,9 @@ import com.google.firebase.firestore.firestore
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun CurrentReservationSection(
@@ -54,13 +57,17 @@ fun CurrentReservationSection(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            reservations.forEach { reservation ->
-                ReservationsItem(
-                    reservation = reservation,
-                    onClick = {
-                        onReservationClick(reservation)
-                    }
-                )
+            if (reservations.isEmpty()) {
+                Text("Sin reservas actuales")
+            } else {
+                reservations.forEach { reservation ->
+                    ReservationsItem(
+                        reservation = reservation,
+                        onClick = {
+                            onReservationClick(reservation)
+                        }
+                    )
+                }
             }
         }
     }
@@ -142,10 +149,7 @@ fun SearchBannerSection(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = "Explorá las canchas más cercanas y reservá tu turno al instante.",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text(text = "Explorá las canchas más cercanas y reservá tu turno al instante.")
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -166,14 +170,38 @@ fun ConnectPeopleSection(
 ) {
 
     var contactId by remember { mutableStateOf("") }
-
     var usuarioEncontrado by remember {
         mutableStateOf<ContactUser?>(null)
     }
-
     var isLoading by remember { mutableStateOf(false) }
-
     val db = Firebase.firestore
+    var noEncontrado by remember { mutableStateOf(false) }
+
+    val currentUid = FirebaseAuth.getInstance().currentUser?.uid
+
+    var friends by remember {
+        mutableStateOf<List<ContactUser>>(emptyList())
+    }
+
+    LaunchedEffect(currentUid) {
+        if (currentUid != null) {
+            val doc = db.collection("users")
+                .document(currentUid)
+                .get()
+                .await()
+
+            val friendsRaw = doc.get("friends") as? List<Map<String, Any>> ?: emptyList()
+
+            friends = friendsRaw.map {
+                ContactUser(
+                    uid = it["uid"] as? String ?: "",
+                    name = it["name"] as? String ?: "",
+                    contactId = it["contactId"] as? String ?: "",
+                    photo = it["photo"] as? String ?: ""
+                )
+            }
+        }
+    }
 
     Card(
         modifier = Modifier
@@ -205,12 +233,21 @@ fun ConnectPeopleSection(
 
             OutlinedTextField(
                 value = contactId,
-                onValueChange = { contactId = it },
+                onValueChange = {
+                    contactId = it
+                    noEncontrado = false
+                    usuarioEncontrado = null
+                },
                 label = { Text("Ingrese el id de contacto") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(12.dp))
+
+            val currentUid = FirebaseAuth
+                .getInstance()
+                .currentUser
+                ?.uid
 
             Button(
                 onClick = {
@@ -222,21 +259,33 @@ fun ConnectPeopleSection(
                         .get()
                         .addOnSuccessListener { result ->
 
-                            val document = result.documents.firstOrNull()
+                            val document = result.documents.firstOrNull {
+                                it.id != currentUid
+                            }
 
                             usuarioEncontrado =
                                 if (document != null) {
+                                    noEncontrado = false
+
                                     ContactUser(
+                                        uid = document.getString("uid") ?: document.id,
                                         name = document.getString("name") ?: "",
                                         contactId = document.getString("contactId") ?: "",
                                         photo = document.getString("photo") ?: ""
                                     )
                                 } else {
+                                    noEncontrado = true
                                     null
                                 }
 
                             isLoading = false
                         }
+                        .addOnFailureListener {
+                            noEncontrado = true
+                            usuarioEncontrado = null
+                            isLoading = false
+                        }
+
                 },
                 enabled = contactId.length == 6,
                 colors = ButtonDefaults.buttonColors(
@@ -286,17 +335,52 @@ fun ConnectPeopleSection(
                         Text("#${usuario.contactId}")
                     }
 
+                    val yaEsAmigo = friends.any { it.uid == usuario.uid }
+
                     Button(
-                        onClick = {},
+                        onClick = {
+                            currentUid?.let { uid ->
+
+                                val friendData = mapOf(
+                                    "uid" to usuario.uid,
+                                    "name" to usuario.name,
+                                    "contactId" to usuario.contactId,
+                                    "photo" to usuario.photo
+                                )
+
+                                if (yaEsAmigo) {
+                                    db.collection("users")
+                                        .document(uid)
+                                        .update("friends", FieldValue.arrayRemove(friendData))
+
+                                    friends = friends.filter { it.uid != usuario.uid }
+                                } else {
+                                    db.collection("users")
+                                        .document(uid)
+                                        .update("friends", FieldValue.arrayUnion(friendData))
+
+                                    friends = friends + usuario
+                                }
+                            }
+                        },
                         modifier = Modifier.width(36.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Green
+                            containerColor = if (yaEsAmigo) Color.Red else Color.Green
                         ),
                         contentPadding = PaddingValues(0.dp)
                     ) {
-                        Text("+")
+                        Text(if (yaEsAmigo) "×" else "+")
                     }
                 }
+            }
+            if (noEncontrado) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "No se ha encontrado un contacto con ese ID",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }
