@@ -60,7 +60,6 @@ class MainActivity : ComponentActivity() {
                                         password,
                                         name,
                                         celphone,
-                                        address,
                                         photoUri
                                         ->
                                         authViewModel.registrar(
@@ -69,7 +68,6 @@ class MainActivity : ComponentActivity() {
                                             password = password,
                                             name = name,
                                             celphone = celphone,
-                                            address = address,
                                             photoUri = photoUri
                                         )
                                     }

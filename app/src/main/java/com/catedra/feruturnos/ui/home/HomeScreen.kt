@@ -5,7 +5,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.catedra.feruturnos.data.model.Court
 import androidx.compose.runtime.*
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth

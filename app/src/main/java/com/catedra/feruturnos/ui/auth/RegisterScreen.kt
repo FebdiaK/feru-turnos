@@ -29,7 +29,6 @@ fun RegisterScreen(
         password: String,
         name: String,
         celphone: Int,
-        address: String,
         photoUri: Uri?
     ) -> Unit
 ) {
@@ -37,7 +36,6 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var celphoneText by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
     var photoUri by remember { mutableStateOf<Uri?>(null) }
 
     val photoPicker = rememberLauncherForActivityResult(
@@ -51,7 +49,6 @@ fun RegisterScreen(
     val formValido =
         email.isNotBlank() &&
         password.isNotBlank() &&
-        address.isNotBlank() &&
         photoUri != null &&
         nombreValido &&
         celularValido &&
@@ -142,16 +139,6 @@ fun RegisterScreen(
             )
         }
 
-        //* DIRECCIÓN */
-        OutlinedTextField(
-            value = address,
-            onValueChange = { address = it },
-            label = { Text("Ingrese su dirección") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp)
-        )
-
         //* FOTO */
         Button(
             onClick = {
@@ -185,7 +172,6 @@ fun RegisterScreen(
                     password,
                     name,
                     celphone ?: 0,
-                    address,
                     photoUri
                 )
             },

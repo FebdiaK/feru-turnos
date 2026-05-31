@@ -54,7 +54,6 @@ class AuthViewModel : ViewModel() {
         password: String,
         name: String,
         celphone: Int,
-        address: String,
         photoUri: Uri?
     ) {
         viewModelScope.launch {
@@ -79,7 +78,6 @@ class AuthViewModel : ViewModel() {
                     "email" to email,
                     "name" to name,
                     "celphone" to celphone,
-                    "address" to address,
                     "photo" to photoUrl,
                     "friends" to emptyList<Map<String, Any>>(),
                     "stars" to emptyList<Int>(),
