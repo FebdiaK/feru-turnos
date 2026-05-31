@@ -326,7 +326,13 @@ fun AppNavigation(
             }
 
             composable(Rutas.NOTIFICATIONS) {
-                NotificationsScreen()
+                NotificationsScreen(
+                    onNotificationClick = { reservationId ->
+                        navController.navigate(
+                            Rutas.reservationDetail(reservationId)
+                        )
+                    }
+                )
             }
         }
     }

@@ -2,74 +2,145 @@ package com.catedra.feruturnos.ui.notifications
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.foundation.lazy.items
-
-data class Notificacion(
-    val sport: String,
-    val startDate: String,
-    val time: String,
-    val place: String,
-    val read: Boolean
-)
+import androidx.compose.ui.unit.dp
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.tasks.await
+import androidx.compose.foundation.clickable
+import kotlinx.coroutines.launch
 
 @Composable
-fun NotificationsScreen() {
-    val notificaciones = listOf(
-        Notificacion("FUTBOL", "Jueves 21 de Mayo", "20:30 hs", "Los manzanos", false),
-        Notificacion("FUTBOL", "Jueves 14 de Mayo", "20:30 hs", "Los manzanos", true),
-        Notificacion("FUTBOL", "Jueves 7 de Mayo", "20:30 hs", "Los manzanos", true),
-        Notificacion("FUTBOL", "Jueves 14 de Mayo", "20:30 hs", "Los manzanos", true),
-        Notificacion("FUTBOL", "Jueves 7 de Mayo", "20:30 hs", "Los manzanos", true),
-        Notificacion("FUTBOL", "Jueves 14 de Mayo", "20:30 hs", "Los manzanos", true),
-        Notificacion("FUTBOL", "Jueves 7 de Mayo", "20:30 hs", "Los manzanos", true),
-        Notificacion("FUTBOL", "Jueves 14 de Mayo", "20:30 hs", "Los manzanos", true),
-        Notificacion("FUTBOL", "Jueves 7 de Mayo", "20:30 hs", "Los manzanos", true)
-    )
+fun NotificationsScreen(
+    onNotificationClick: (String) -> Unit
+) {
+    var notifications by remember { mutableStateOf<List<AppNotification>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
 
-    LazyColumn( modifier = Modifier.fillMaxSize() ) {
-        items(notificaciones) { noti ->
-            NotificacionItem(noti)
+    val uid = Firebase.auth.currentUser?.uid
+
+    LaunchedEffect(uid) {
+        if (uid != null) {
+            try {
+                val result = Firebase.firestore
+                    .collection("notifications")
+                    .whereEqualTo("userId", uid)
+                    .get()
+                    .await()
+
+                notifications = result.documents.mapNotNull { doc ->
+                    doc.toObject(AppNotification::class.java)?.copy(
+                        id = doc.id
+                    )
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                isLoading = false
+            }
+        } else {
+            isLoading = false
+        }
+    }
+
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+        return
+    }
+
+    if (notifications.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("No tenés notificaciones")
+        }
+        return
+    }
+
+    val scope = rememberCoroutineScope()
+
+    LazyColumn {
+        items(notifications) { notification ->
+
+            NotificationItem(
+                notification = notification,
+                onClick = {
+                    scope.launch {
+
+                        Firebase.firestore
+                            .collection("notifications")
+                            .document(notification.id)
+                            .update("read", true)
+                            .await()
+
+                        onNotificationClick(
+                            notification.reservationId
+                        )
+                    }
+                }
+            )
         }
     }
 }
 
 @Composable
-fun NotificacionItem(notificacion: Notificacion) {
+fun NotificationItem(notification: AppNotification, onClick: () -> Unit) {
     Column(
         modifier = Modifier
+            .clickable {
+                onClick()
+            }
             .fillMaxWidth()
             .border(
                 width = 4.dp,
-                color = if (!notificacion.read) MaterialTheme.colorScheme.secondary
-                else Color.White
+                color = if (!notification.read) {
+                    MaterialTheme.colorScheme.secondary
+                } else {
+                    Color.White
+                }
             )
             .background(
-                if (notificacion.read) Color.White
-                else MaterialTheme.colorScheme.tertiary
+                if (notification.read) {
+                    Color.White
+                } else {
+                    MaterialTheme.colorScheme.tertiary
+                }
             )
-            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .padding(16.dp)
     ) {
         Text(
-            text = "Usted ha sido añadido a una reserva de ${notificacion.sport}. " +
-                    "Datos de la reserva: ${notificacion.startDate}, ${notificacion.time}. " +
-                    "en ${notificacion.place}",
+            text = notification.title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = if (notification.read) FontWeight.Normal else FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = notification.message,
             style = MaterialTheme.typography.bodyLarge,
-            fontWeight = if (notificacion.read) FontWeight.Normal else FontWeight.Medium
+            fontWeight = if (notification.read) FontWeight.Normal else FontWeight.Medium
         )
     }
 
@@ -80,9 +151,9 @@ fun NotificacionItem(notificacion: Notificacion) {
             .background(Color(0xFFF2F2F2))
     )
 }
-
+/**
 @Preview(showBackground = true)
 @Composable
 fun NotificationsScreenPreview() {
     NotificationsScreen()
-}
+}*/

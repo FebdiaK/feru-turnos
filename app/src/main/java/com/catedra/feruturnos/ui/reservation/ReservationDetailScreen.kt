@@ -33,6 +33,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.Button
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import com.google.firebase.firestore.FieldValue
 
 @Composable
 fun ReservationDetailScreen(
@@ -42,6 +46,7 @@ fun ReservationDetailScreen(
     var isLoading by remember { mutableStateOf(true) }
     var addressText by remember { mutableStateOf("") }
 
+    val scope = rememberCoroutineScope()
     val context = androidx.compose.ui.platform.LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -171,6 +176,30 @@ fun ReservationDetailScreen(
                 Text("Creador de reserva")
                 Text("${r.reservationCreatorName}")
                 Text("${r.reservationCreatorPhone}")
+
+                Button(
+                    onClick = {
+                        scope.launch {
+                            r.participantsId.forEach { participantId ->
+                                Firebase.firestore
+                                    .collection("notifications")
+                                    .add(
+                                        hashMapOf(
+                                            "userId" to participantId,
+                                            "title" to "Nueva reserva",
+                                            "message" to "Fuiste agregado a una reserva de ${r.placeFieldType} en ${r.placeName}",
+                                            "reservationId" to r.id,
+                                            "read" to false,
+                                            "createdAt" to FieldValue.serverTimestamp()
+                                        )
+                                    )
+                                    .await()
+                            }
+                        }
+                    }
+                ) {
+                    Text("Generar reserva")
+                }
             }
         }
     }
@@ -226,4 +255,22 @@ fun FixedReservationMap(
                 }
         )
     }
+}
+
+private suspend fun crearNotificacionDePrueba(
+    reservation: Reservation
+) {
+    Firebase.firestore
+        .collection("notifications")
+        .add(
+            hashMapOf(
+                "userId" to reservation.creatorId,
+                "title" to "Nueva reserva",
+                "message" to "Fuiste agregado a una reserva de ${reservation.placeFieldType} en ${reservation.placeName}",
+                "reservationId" to reservation.id,
+                "read" to false,
+                "createdAt" to FieldValue.serverTimestamp()
+            )
+        )
+        .await()
 }
