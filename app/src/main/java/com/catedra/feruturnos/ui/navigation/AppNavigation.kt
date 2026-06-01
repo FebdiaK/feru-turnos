@@ -84,6 +84,7 @@ fun AppNavigation(
     val tituloActual = when (rutaActual) {
         Rutas.HOME -> "Inicio"
         Rutas.SEARCH -> "Búsqueda"
+        Rutas.ENCLOSURE_DETAIL -> "Predio"
         Rutas.PROFILE -> "Perfil"
         Rutas.CONTACTS -> "Contactos"
         Rutas.NOTIFICATIONS -> "Notificaciones"

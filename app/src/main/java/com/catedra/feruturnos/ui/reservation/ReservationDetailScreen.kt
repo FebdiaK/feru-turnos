@@ -24,6 +24,8 @@ import org.osmdroid.util.GeoPoint
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.input.pointer.pointerInput
 import android.location.Geocoder
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -34,17 +36,28 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import com.google.firebase.firestore.FieldValue
+import androidx.compose.material3.HorizontalDivider
+import com.catedra.feruturnos.ui.home.ContactUser
+import coil.compose.AsyncImage
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 @Composable
 fun ReservationDetailScreen(
     reservationId: String
 ) {
     var reservation by remember { mutableStateOf<Reservation?>(null) }
+    var participants by remember {
+        mutableStateOf<List<ContactUser>>(emptyList())
+    }
     var isLoading by remember { mutableStateOf(true) }
-    var addressText by remember { mutableStateOf("") }
 
     val scope = rememberCoroutineScope()
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -67,6 +80,29 @@ fun ReservationDetailScreen(
             reservation = doc.toObject(Reservation::class.java)?.copy(
                 id = doc.id
             )
+
+            val reservationData = reservation
+
+            if (reservationData != null) {
+
+                val users = reservationData.participantsId.mapNotNull { uid ->
+
+                    val userDoc = Firebase.firestore
+                        .collection("users")
+                        .document(uid)
+                        .get()
+                        .await()
+
+                    ContactUser(
+                        uid = uid,
+                        name = userDoc.getString("name") ?: "",
+                        contactId = userDoc.getString("contactId") ?: "",
+                        photo = userDoc.getString("photo") ?: ""
+                    )
+                }
+
+                participants = users
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
@@ -96,7 +132,7 @@ fun ReservationDetailScreen(
         return
     }
 
-    val mapPoint = r.placeAddress?.let {
+    val mapPoint = r.placeLocation?.let {
         GeoPoint(it.latitude, it.longitude)
     }
 
@@ -114,6 +150,33 @@ fun ReservationDetailScreen(
             )
         }
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.secondary)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = r.placeName,
+                color = Color.White,
+                modifier = Modifier.weight(2f)
+            )
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = "Ir",
+                tint = Color.White
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+/**
         LaunchedEffect(mapPoint) {
             if (mapPoint != null) {
                 addressText = withContext(Dispatchers.IO) {
@@ -131,52 +194,97 @@ fun ReservationDetailScreen(
                     }
                 }
             }
-        }
-
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.secondary)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = r.placeName,
-                    color = Color.White,
-                    modifier = Modifier.weight(2f)
-                )
-
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Ir",
-                    tint = Color.White
-                )
-            }
+        }*/
 
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
 
-                Text(
-                    text = if (addressText.isNotBlank()) {
-                        "Dirección: $addressText"
-                    } else {
-                        "Dirección: cargando..."
-                    }
-                )
 
+                Text("Dirección: ${r.placeAddress}")
                 Text("Cancha: ${r.placeFieldType}")
+                Text("Precio total: $${r.placeFieldPrice}")
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    thickness = 1.dp,
+                    color = Color.LightGray
+                )
+                Text("Creador de reserva")
+                Text("${r.reservationCreatorName} - Tel: ${r.reservationCreatorPhone}")
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    thickness = 1.dp,
+                    color = Color.LightGray
+                )
                 Text("Día: ${r.reservationDay}")
                 Text("Hora: ${r.reservationHour} hs")
-                Text("Precio: $${r.placeFieldPrice}")
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    thickness = 1.dp,
+                    color = Color.LightGray
+                )
+                Text("Participantes")
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Text("Creador de reserva")
-                Text("${r.reservationCreatorName}")
-                Text("${r.reservationCreatorPhone}")
+                participants.forEach { participant ->
 
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        AsyncImage(
+                            model = participant.photo,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column {
+                            Text(participant.name)
+                            Text(
+                                "#${participant.contactId}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+                }
+
+                Button(
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("Invitar contactos")
+                }
+
+                Button(
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    ),
+                ) {
+                    Text("Abrir convocatoria")
+                }
+
+                Button(
+                    onClick = {},
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Red,
+                        contentColor = Color.White
+                ),
+                ) {
+                    Text("Cancelar reserva")
+                }
+
+                /**
                 Button(
                     onClick = {
                         scope.launch {
@@ -204,6 +312,8 @@ fun ReservationDetailScreen(
                 ) {
                     Text("Generar notificación")
                 }
+                */
+
             }
         }
     }
