@@ -48,11 +48,15 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.catedra.feruturnos.ui.contacts.ContactsScreen
 import com.catedra.feruturnos.ui.reservation.ReservationDetailScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.catedra.feruturnos.ui.enclosure.EnclosureDetailScreen
+import com.catedra.feruturnos.ui.profile.ProfileViewModel
+import androidx.compose.runtime.collectAsState
 
 object Rutas {
     const val HOME = "Inicio"
@@ -63,6 +67,7 @@ object Rutas {
     fun reservationDetail(id: String) = "reservation/$id"
     const val ENCLOSURE_DETAIL = "enclosure/{enclosureId}"
     fun enclosureDetail(id: String) = "enclosure/$id"
+    const val CONTACTS = "contacts"
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -80,8 +85,10 @@ fun AppNavigation(
         Rutas.HOME -> "Inicio"
         Rutas.SEARCH -> "Búsqueda"
         Rutas.PROFILE -> "Perfil"
+        Rutas.CONTACTS -> "Contactos"
         Rutas.NOTIFICATIONS -> "Notificaciones"
-        else -> "Reserva"
+        Rutas.RESERVATION_DETAIL -> "Reserva"
+        else -> ""
     }
 
     // Estado del permiso de ubicación para pasárselo a la SearchScreen
@@ -338,7 +345,21 @@ fun AppNavigation(
             }
 
             composable(Rutas.PROFILE) {
-                ProfileScreen()
+                ProfileScreen(
+                    onNavigateToContacts = {
+                        navController.navigate(Rutas.CONTACTS)
+                    }
+                )
+            }
+
+            composable(Rutas.CONTACTS) {
+                val profileViewModel: ProfileViewModel = viewModel ()
+
+                val profileState by profileViewModel.profileState.collectAsState()
+
+                ContactsScreen(
+                    contacts = profileState.friends
+                )
             }
 
             composable(Rutas.NOTIFICATIONS) {

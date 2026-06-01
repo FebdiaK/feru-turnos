@@ -7,11 +7,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun ProfileScreen(
+    onNavigateToContacts: () -> Unit,
     viewModel: ProfileViewModel = viewModel()
 ) {
     val profileState by viewModel.profileState.collectAsState()
 
     ProfileContent(
-        profileState = profileState
+        profileState = profileState,
+        onNavigateToContacts = onNavigateToContacts
     )
 }

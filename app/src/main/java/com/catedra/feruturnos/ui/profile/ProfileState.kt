@@ -1,5 +1,7 @@
 package com.catedra.feruturnos.ui.profile
 
+import com.catedra.feruturnos.ui.home.ContactUser
+
 data class ProfileState(
     val uid: String = "",
     val contactId: String = "",
@@ -10,5 +12,6 @@ data class ProfileState(
     val celphone: Int = 0,
     val stars: List<Int> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val friends: List<ContactUser> = emptyList()
 )

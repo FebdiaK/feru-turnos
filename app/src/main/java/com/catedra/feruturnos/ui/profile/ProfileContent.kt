@@ -16,18 +16,17 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.border
 
 @Composable
 fun ProfileContent(
-    profileState: ProfileState
+    profileState: ProfileState,
+    onNavigateToContacts: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -52,9 +51,14 @@ fun ProfileContent(
                 model = profileState.photo,
                 contentDescription = "Foto de perfil",
                 modifier = Modifier
+                    .padding(24.dp)
                     .size(144.dp)
                     .clip(CircleShape)
-                    .padding(24.dp),
+                    .border(
+                        width = 3.dp,
+                        color = MaterialTheme.colorScheme.secondary,
+                        shape = CircleShape
+                    ),
                 contentScale = ContentScale.Crop
             )
         }
@@ -81,7 +85,9 @@ fun ProfileContent(
         }
 
         Button(
-            onClick = {},
+            onClick = {
+                onNavigateToContacts()
+            },
             enabled = true,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondary,
@@ -95,7 +101,7 @@ fun ProfileContent(
         }
     }
 }
-
+/**
 @Preview(showBackground = true)
 @Composable
 fun ProfileContentPreview() {
@@ -107,7 +113,8 @@ fun ProfileContentPreview() {
             email = "casandra@email.com",
             address = "Berazategui",
             photo = "https://s3.ppllstatics.com/canarias7/www/multimedia/201704/14/media/cortadas/462076-1g_CSN462076_MG3928385--1248x702.jpg",
-            celphone = 1122334455
+            celphone = 1122334455,
+            friends = []
         )
     )
-}
+}*/
