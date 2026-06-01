@@ -8,6 +8,7 @@ data class ProfileState(
     val address: String = "",
     val photo: String = "",
     val celphone: Int = 0,
+    val stars: List<Int> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 )

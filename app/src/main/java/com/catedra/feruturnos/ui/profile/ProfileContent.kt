@@ -73,13 +73,12 @@ fun ProfileContent(
         )
 
         Text(profileState.email)
-        Text(profileState.address)
         Text("${profileState.celphone}")
 
-        Text(
-            "Puntuación de 5★",
-            Modifier.padding(16.dp)
-        )
+        if (profileState.stars.isNotEmpty()) {
+            val promedio = profileState.stars.average()
+            Text( text = "Puntuación ${String.format("%.1f", promedio)}★" )
+        }
 
         Button(
             onClick = {},
@@ -88,7 +87,9 @@ fun ProfileContent(
                 containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = Color.White
             ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top= 16.dp)
         ) {
             Text("Contactos")
         }

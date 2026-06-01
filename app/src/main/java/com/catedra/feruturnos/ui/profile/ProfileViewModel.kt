@@ -43,6 +43,8 @@ class ProfileViewModel : ViewModel() {
                     .get()
                     .await()
 
+                val stars = document.get("stars") as? List<Long> ?: emptyList()
+
                 _profileState.value = ProfileState(
                     uid = uid,
                     contactId = document.getString("contactId") ?: "",
@@ -51,7 +53,7 @@ class ProfileViewModel : ViewModel() {
                     address = document.getString("address") ?: "",
                     photo = document.getString("photo") ?: "",
                     celphone = document.getLong("celphone")?.toInt() ?: 0,
-                    isLoading = false
+                    stars = stars.map { it.toInt() }
                 )
 
             } catch (e: Exception) {
