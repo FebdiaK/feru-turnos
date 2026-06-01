@@ -39,6 +39,7 @@ fun NotificationsScreen(
             try {
                 val result = Firebase.firestore
                     .collection("notifications")
+                    .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
                     .get()
                     .await()
 
@@ -149,7 +150,6 @@ fun NotificationsScreen(
                                     item
                                 }
                             }
-
                             onNotificationClick(notification.reservationId)
                         }
                     }

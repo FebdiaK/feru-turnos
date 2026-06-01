@@ -317,7 +317,10 @@ fun AppNavigation(
                     backStackEntry.arguments?.getString("reservationId") ?: ""
 
                 ReservationDetailScreen(
-                    reservationId = reservationId
+                    reservationId = reservationId,
+                    onReservationCancelled = {
+                        navController.popBackStack()
+                    }
                 )
             }
 

@@ -51,13 +51,15 @@ import androidx.compose.foundation.verticalScroll
 
 @Composable
 fun ReservationDetailScreen(
-    reservationId: String
+    reservationId: String,
+    onReservationCancelled: () -> Unit
 ) {
     var reservation by remember { mutableStateOf<Reservation?>(null) }
     var participants by remember {
         mutableStateOf<List<ContactUser>>(emptyList())
     }
     var isLoading by remember { mutableStateOf(true) }
+    var isCancelling by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -274,46 +276,62 @@ fun ReservationDetailScreen(
                 }
 
                 Button(
-                    onClick = {},
+                    onClick = {
+                        scope.launch {
+                            try {
+                                isCancelling = true
+
+                                val relatedUsers = r.participantsId.map { participantId ->
+                                    mapOf(
+                                        "userId" to participantId,
+                                        "read" to false
+                                    )
+                                }
+
+                                Firebase.firestore
+                                    .collection("notifications")
+                                    .add(
+                                        hashMapOf(
+                                            "title" to "Reserva cancelada",
+                                            "message" to "La reserva de ${r.placeFieldType} en ${r.placeName} se ha cancelado.",
+                                            "reservationId" to r.id,
+                                            "relatedUsers" to relatedUsers,
+                                            "createdAt" to FieldValue.serverTimestamp()
+                                        )
+                                    )
+                                    .await()
+
+                                Firebase.firestore
+                                    .collection("reservations")
+                                    .document(reservationId)
+                                    .delete()
+                                    .await()
+
+                                onReservationCancelled()
+
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                isCancelling = false
+                            }
+                        }
+                    },
+                    enabled = !isCancelling,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Red,
                         contentColor = Color.White
-                ),
+                    )
                 ) {
-                    Text("Cancelar reserva")
-                }
-
-                /**
-                Button(
-                    onClick = {
-                        scope.launch {
-                            val relatedUsers = r.participantsId.map { participantId ->
-                                mapOf(
-                                    "userId" to participantId,
-                                    "read" to false
-                                )
-                            }
-
-                            Firebase.firestore
-                                .collection("notifications")
-                                .add(
-                                    hashMapOf(
-                                        "title" to "Nueva reserva",
-                                        "message" to "Fuiste agregado a una reserva de ${r.placeFieldType} en ${r.placeName}",
-                                        "reservationId" to r.id,
-                                        "relatedUsers" to relatedUsers,
-                                        "createdAt" to FieldValue.serverTimestamp()
-                                    )
-                                )
-                                .await()
-                        }
+                    if (isCancelling) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Cancelar reserva")
                     }
-                ) {
-                    Text("Generar notificación")
                 }
-                */
-
             }
         }
     }
