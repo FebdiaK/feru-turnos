@@ -179,7 +179,21 @@ fun SearchScreen(
         searchQuery
     ) {
         val filtered = enclosures.filter { enclosure ->
-            enclosure.name.contains(searchQuery, ignoreCase = true)
+            val matchesName =
+                enclosure.name.contains(
+                    searchQuery,
+                    ignoreCase = true
+                )
+
+            val matchesSport =
+                enclosure.fields.any { field ->
+                    field.type.contains(
+                        searchQuery,
+                        ignoreCase = true
+                    )
+                }
+
+            matchesName || matchesSport
         }
 
         if (userLocation != null) {
@@ -347,7 +361,7 @@ fun SearchTextFieldCard(
             value = searchQuery,
             onValueChange = onSearchQueryChange,
             placeholder = {
-                Text("Buscar predio...")
+                Text("Buscar predio o deporte...")
             },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
