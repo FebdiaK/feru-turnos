@@ -344,7 +344,13 @@ fun AppNavigation(
                     backStackEntry.arguments?.getString("enclosureId") ?: ""
 
                 EnclosureDetailScreen(
-                    enclosureId = enclosureId
+                    enclosureId = enclosureId,
+                    onReservationCreated = { reservationId ->
+                        navController.navigate(Rutas.reservationDetail(reservationId)) {
+                            popUpTo(Rutas.ENCLOSURE_DETAIL) { inclusive = true }
+                        }
+                    }
+
                 )
             }
 

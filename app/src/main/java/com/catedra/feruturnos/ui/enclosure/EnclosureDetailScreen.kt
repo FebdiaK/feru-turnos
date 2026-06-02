@@ -26,17 +26,34 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SuggestionChip
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextAlign
+import com.catedra.feruturnos.ui.reservation.ReservationRepository
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.rememberCoroutineScope
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 @Composable
 fun EnclosureDetailScreen(
-    enclosureId: String
+    enclosureId: String,
+    onReservationCreated: (reservationId: String) -> Unit = {}
 ) {
     var enclosure by remember { mutableStateOf<EnclosureItem?>(null) }
     var isLoading by remember { mutableStateOf(true) }
 
+    val isPreview = LocalInspectionMode.current
+
     LaunchedEffect(enclosureId) {
+        if (isPreview) {
+            isLoading = false
+            return@LaunchedEffect
+        }
         try {
             val doc = Firebase.firestore
                 .collection("enclosures")
@@ -108,265 +125,342 @@ fun EnclosureDetailScreen(
 
         else -> {
             EnclosureDetailContent(
-                enclosure = enclosure!!
+                enclosure = enclosure!!,
+                onReservationCreated = onReservationCreated
             )
         }
     }
 }
 @Composable
 fun EnclosureDetailContent(
-    enclosure: EnclosureItem
+    enclosure: EnclosureItem,
+    onReservationCreated: (reservationId: String) -> Unit = {}
 ) {
+    val repository = remember { ReservationRepository() }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     var selectedField by remember { mutableStateOf(enclosure.fields.firstOrNull()) }
-    var selectedDay by remember { mutableStateOf<String?>(null) }
-    var selectedHour by remember { mutableStateOf<String?>(null) }
+    var selectedDay   by remember { mutableStateOf<String?>(null) }
+    var selectedHour  by remember { mutableStateOf<String?>(null) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    var isLoading         by remember { mutableStateOf(false) }
 
-        // ── Header card ──────────────────────────────────────────
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(2.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
+    val isPreview = LocalInspectionMode.current
+    val auth = remember { if (isPreview) null else FirebaseAuth.getInstance() }
+    var reservationName by remember { mutableStateOf("Reserva de: ...") }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = enclosure.name,
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.weight(1f)
-                    )
-                    SuggestionChip(
-                        onClick = {},
-                        label = {
-                            Text(
-                                text = "📞 ${enclosure.phone}",
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
-                    )
-                }
+    LaunchedEffect(Unit) {
+        val uid = auth?.currentUser?.uid
+        android.util.Log.d("ENCLOSURE_DEBUG", "uid en composable: $uid")
+        if (uid == null) return@LaunchedEffect
+        try {
+            val userQuery = Firebase.firestore
+                .collection("users")
+                .whereEqualTo("uid", uid)
+                .get()
+                .await()
+            android.util.Log.d("ENCLOSURE_DEBUG", "docs encontrados: ${userQuery.documents.size}")
+            android.util.Log.d("ENCLOSURE_DEBUG", "name: ${userQuery.documents.firstOrNull()?.getString("name")}")
+            val name = userQuery.documents.firstOrNull()?.getString("name") ?: "usuario"
+            reservationName = "Reserva de: $name"
+        } catch (e: Exception) {
+            android.util.Log.e("ENCLOSURE_DEBUG", "error: ${e.message}")
+            reservationName = "Reserva de: usuario"
+        }
+    }
 
-                Spacer(modifier = Modifier.height(6.dp))
+    LaunchedEffect(Unit) {
+        val uid = auth?.currentUser?.uid
+        android.util.Log.d("ENCLOSURE_DEBUG", "uid en composable: $uid")
+        if (uid == null) return@LaunchedEffect
+        try {
+            // Traé TODOS los docs de users y buscá a mano
+            val allUsers = Firebase.firestore
+                .collection("users")
+                .get()
+                .await()
+            android.util.Log.d("ENCLOSURE_DEBUG", "total users: ${allUsers.documents.size}")
+            allUsers.documents.forEach { doc ->
+                android.util.Log.d("ENCLOSURE_DEBUG", "doc id: ${doc.id} | uid field: ${doc.getString("uid")} | name: ${doc.getString("name")}")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ENCLOSURE_DEBUG", "error: ${e.message}")
+        }
+    }
 
-                Text(
-                    text = "📍 ${enclosure.address}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
 
-                if (enclosure.amenities.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(12.dp))
+    // Dialog de confirmación
+    if (showConfirmDialog && selectedField != null && selectedDay != null && selectedHour != null) {
+        AlertDialog(
+            onDismissRequest = { if (!isLoading) showConfirmDialog = false },
+            title = { Text("Confirmar reserva") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SummaryRow("Cancha",  "${selectedField!!.fieldName} — ${selectedField!!.type}")
+                    SummaryRow("Día",     selectedDay!!.replaceFirstChar { it.uppercase() })
+                    SummaryRow("Horario", "$selectedHour:00 hs")
+                    SummaryRow("Total",   "$${selectedField!!.price}")
                     HorizontalDivider()
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    OutlinedTextField(
+                        value = reservationName,
+                        onValueChange = { reservationName = it },
+                        label = { Text("Nombre de la reserva") },
+                        singleLine = true,
                         modifier = Modifier.fillMaxWidth()
-                    ) {
-                        enclosure.amenities.forEach { amenity ->
-                            AssistChip(
-                                onClick = {},
-                                enabled = false,
-                                label = { Text(amenity) }
-                            )
-                        }
-                    }
+                    )
                 }
-            }
-        }
-
-        // ── Selección de cancha ──────────────────────────────────
-        Text(
-            text = "Elegí una cancha",
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        // Grilla de 2 columnas — altura fija para que LazyVerticalGrid
-        // conviva bien dentro del Column + verticalScroll
-        val fieldCardHeight = 90.dp
-        val gridRows = Math.ceil(enclosure.fields.size / 2.0).toInt()
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(fieldCardHeight * gridRows + 8.dp * (gridRows - 1)),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            userScrollEnabled = false
-        ) {
-            items(enclosure.fields) { field ->
-                val isSelected = selectedField?.id == field.id
-                Card(
+            },
+            confirmButton = {
+                Button(
+                    enabled = !isLoading,
                     onClick = {
-                        selectedField = field
-                        selectedDay = null
-                        selectedHour = null
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(fieldCardHeight),
-                    border = if (isSelected)
-                        CardDefaults.outlinedCardBorder().copy(
-                            width = 2.dp
-                        )
-                    else null,
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isSelected)
-                            MaterialTheme.colorScheme.primaryContainer
-                        else
-                            MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(if (isSelected) 0.dp else 2.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(12.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column {
-                            Text(
-                                text = field.fieldName,
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                            Text(
-                                text = field.type,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        scope.launch {
+                            isLoading = true
+                            try {
+                                val id = repository.createReservation(
+                                    enclosure       = enclosure,
+                                    field           = selectedField!!,
+                                    selectedDay     = selectedDay!!,
+                                    selectedHour    = selectedHour!!,
+                                    reservationName = reservationName
+                                )
+                                showConfirmDialog = false
+                                snackbarHostState.showSnackbar("¡Reserva creada correctamente!")
+                                onReservationCreated(id)
+                            } catch (e: Exception) {
+                                snackbarHostState.showSnackbar(
+                                    "Error: ${e.message ?: "No se pudo crear la reserva"}"
+                                )
+                            } finally {
+                                isLoading = false
+                            }
                         }
-                        Text(
-                            text = "$${field.price}",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
+                    }
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
+                    } else {
+                        Text("Confirmar")
                     }
                 }
-            }
-        }
-
-        // ── Días y horarios (solo si hay cancha seleccionada) ────
-        selectedField?.let { field ->
-
-            // Días — grilla de 3 columnas
-            Text(
-                text = "Día",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(0.5.dp)
-            ) {
-                field.days.forEach { day ->
-                    FilterChip(
-                        selected = selectedDay == day,
-                        onClick = { selectedDay = day },
-                        label = {
-                            Text(
-                                text = day.replaceFirstChar { it.uppercase() },
-                                textAlign = TextAlign.Center,
-                                maxLines = 1
-                            )
-                        }
-                    )
-                }
-            }
-
-            //Horario
-            Text(
-                text = "Horario",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(0.5.dp)
-            ) {
-                field.timeTable.forEach { hour ->
-                    FilterChip(
-                        selected = selectedHour == hour,
-                        onClick = { selectedHour = hour },
-                        label = {
-                            Text(
-                                text = "$hour:00",
-                                textAlign = TextAlign.Center,
-                                maxLines = 1
-                            )
-                        }
-                    )
-                }
-            }
-
-            // Resumen + confirmar
-            if (selectedDay != null && selectedHour != null) {
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(2.dp)
+            },
+            dismissButton = {
+                TextButton(
+                    enabled = !isLoading,
+                    onClick = { showConfirmDialog = false }
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // ── Header card ──────────────────────────────────────
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(2.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = "Resumen de reserva",
-                            style = MaterialTheme.typography.titleMedium
+                            text = enclosure.name,
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.weight(1f)
                         )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        SummaryRow(label = "Cancha", value = "${field.fieldName} — ${field.type}")
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
-                        SummaryRow(
-                            label = "Día",
-                            value = selectedDay!!.replaceFirstChar { it.uppercase() }
+                        SuggestionChip(
+                            onClick = {},
+                            label = {
+                                Text(
+                                    text = "📞 ${enclosure.phone}",
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
                         )
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
-                        SummaryRow(label = "Horario", value = "$selectedHour:00 hs")
-
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "📍 ${enclosure.address}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (enclosure.amenities.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(12.dp))
                         HorizontalDivider()
                         Spacer(modifier = Modifier.height(12.dp))
-
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
+                            enclosure.amenities.forEach { amenity ->
+                                AssistChip(onClick = {}, enabled = false, label = { Text(amenity) })
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── Selección de cancha ──────────────────────────────
+            Text("Elegí una cancha", style = MaterialTheme.typography.titleMedium)
+
+            val fieldCardHeight = 90.dp
+            val gridRows = Math.ceil(enclosure.fields.size / 2.0).toInt()
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(fieldCardHeight * gridRows + 8.dp * (gridRows - 1)),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                userScrollEnabled = false
+            ) {
+                items(enclosure.fields) { field ->
+                    val isSelected = selectedField?.id == field.id
+                    Card(
+                        onClick = {
+                            selectedField = field
+                            selectedDay   = null
+                            selectedHour  = null
+                        },
+                        modifier = Modifier.fillMaxWidth().height(fieldCardHeight),
+                        border = if (isSelected) CardDefaults.outlinedCardBorder().copy(width = 2.dp) else null,
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSelected)
+                                MaterialTheme.colorScheme.primaryContainer
+                            else
+                                MaterialTheme.colorScheme.surface
+                        ),
+                        elevation = CardDefaults.cardElevation(if (isSelected) 0.dp else 2.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(12.dp),
+                            verticalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+                                Text(field.fieldName, style = MaterialTheme.typography.labelLarge)
+                                Text(
+                                    field.type,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                             Text(
-                                text = "Total",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = "$${field.price}",
-                                style = MaterialTheme.typography.headlineSmall,
+                                "$${field.price}",
+                                style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
                 }
+            }
 
-                Button(
-                    onClick = { /* Crear reserva */ },
-                    modifier = Modifier.fillMaxWidth()
+            // ── Días, horarios y resumen ─────────────────────────
+            selectedField?.let { field ->
+                Text("Día", style = MaterialTheme.typography.titleMedium)
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.5.dp)
                 ) {
-                    Text("Confirmar reserva")
+                    field.days.forEach { day ->
+                        FilterChip(
+                            selected = selectedDay == day,
+                            onClick  = { selectedDay = day },
+                            label    = {
+                                Text(
+                                    day.replaceFirstChar { it.uppercase() },
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 1
+                                )
+                            }
+                        )
+                    }
+                }
+
+                Text("Horario", style = MaterialTheme.typography.titleMedium)
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.5.dp)
+                ) {
+                    field.timeTable.forEach { hour ->
+                        FilterChip(
+                            selected = selectedHour == hour,
+                            onClick  = { selectedHour = hour },
+                            label    = {
+                                Text(
+                                    "$hour:00",
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 1
+                                )
+                            }
+                        )
+                    }
+                }
+
+                if (selectedDay != null && selectedHour != null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text("Resumen de reserva", style = MaterialTheme.typography.titleMedium)
+                            Spacer(modifier = Modifier.height(12.dp))
+                            SummaryRow("Cancha",  "${field.fieldName} — ${field.type}")
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
+                            SummaryRow("Día",     selectedDay!!.replaceFirstChar { it.uppercase() })
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
+                            SummaryRow("Horario", "$selectedHour:00 hs")
+                            Spacer(modifier = Modifier.height(12.dp))
+                            HorizontalDivider()
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("Total", style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    "$${field.price}",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+
+                    Button(
+                        onClick = { showConfirmDialog = true },  // ← abre el dialog
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Confirmar reserva")
+                    }
                 }
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier  = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 
@@ -437,7 +531,8 @@ private val previewEnclosure = EnclosureItem(
 @Composable
 fun EnclosureDetailContentPreview() {
     EnclosureDetailContent(
-        enclosure = previewEnclosure
+        enclosure = previewEnclosure,
+        onReservationCreated = {}
     )
 }
 
