@@ -19,5 +19,6 @@ data class Reservation(
     val reservationCreatorPhone: Int = 0,
     val reservationDay: String = "",
     val reservationHour: String = "",
-    val reservationName: String = ""
+    val reservationName: String = "",
+    val open: Boolean = false
 )

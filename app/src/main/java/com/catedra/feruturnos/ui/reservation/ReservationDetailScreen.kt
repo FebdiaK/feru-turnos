@@ -48,12 +48,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
+import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 
 @Composable
 fun ReservationDetailScreen(
     reservationId: String,
     onReservationCancelled: () -> Unit
 ) {
+
     var reservation by remember { mutableStateOf<Reservation?>(null) }
     var participants by remember {
         mutableStateOf<List<ContactUser>>(emptyList())
@@ -63,6 +69,12 @@ fun ReservationDetailScreen(
 
     val scope = rememberCoroutineScope()
     val context = androidx.compose.ui.platform.LocalContext.current
+
+    var editedDay by remember { mutableStateOf("") }
+    var editedHour by remember { mutableStateOf("") }
+    var editingDateTime by remember { mutableStateOf(false) }
+    var openChecked by remember { mutableStateOf(false) }
+    var isSavingChanges by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         Configuration.getInstance().apply {
@@ -82,6 +94,10 @@ fun ReservationDetailScreen(
             reservation = doc.toObject(Reservation::class.java)?.copy(
                 id = doc.id
             )
+
+            editedDay = reservation?.reservationDay ?: ""
+            editedHour = reservation?.reservationHour ?: ""
+            openChecked = reservation?.open ?: false
 
             val reservationData = reservation
 
@@ -134,6 +150,9 @@ fun ReservationDetailScreen(
         return
     }
 
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+    val isCreator = currentUserId == r.creatorId
+
     val mapPoint = r.placeLocation?.let {
         GeoPoint(it.latitude, it.longitude)
     }
@@ -178,30 +197,10 @@ fun ReservationDetailScreen(
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
         ) {
-/**
-        LaunchedEffect(mapPoint) {
-            if (mapPoint != null) {
-                addressText = withContext(Dispatchers.IO) {
-                    try {
-                        val geocoder = Geocoder(context, Locale.getDefault())
-                        val results = geocoder.getFromLocation(
-                            mapPoint.latitude,
-                            mapPoint.longitude,
-                            1
-                        )
-
-                        results?.firstOrNull()?.getAddressLine(0) ?: ""
-                    } catch (e: Exception) {
-                        ""
-                    }
-                }
-            }
-        }*/
 
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-
 
                 Text("Dirección: ${r.placeAddress}")
                 Text("Cancha: ${r.placeFieldType}")
@@ -214,14 +213,131 @@ fun ReservationDetailScreen(
                 Text("Creador de reserva")
                 Text("${r.reservationCreatorName} - Tel: ${r.reservationCreatorPhone}")
                 HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier.padding(vertical = 16.dp),
                     thickness = 1.dp,
                     color = Color.LightGray
                 )
-                Text("Día: ${r.reservationDay}")
-                Text("Hora: ${r.reservationHour} hs")
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        if (editingDateTime) {
+                            OutlinedTextField(
+                                value = editedDay,
+                                onValueChange = { editedDay = it },
+                                label = { Text("Día") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            OutlinedTextField(
+                                value = editedHour,
+                                onValueChange = { editedHour = it },
+                                label = { Text("Hora") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        } else {
+                            Text("Día: $editedDay")
+                            Text("Hora: $editedHour hs")
+                        }
+                    }
+
+                    if (isCreator) {
+                        IconButton(
+                            onClick = {
+                                editingDateTime = !editingDateTime
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar día y hora"
+                            )
+                        }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if(isCreator) {
+                        Checkbox(
+                            checked = openChecked,
+                            onCheckedChange = { checked ->
+                                openChecked = checked
+                            },
+                        )
+                    }
+
+                    Text(
+                        text = if (openChecked) {
+                            "Convocatoria abierta"
+                        } else {
+                            "Convocatoria cerrada"
+                        }
+                    )
+                }
+
+                if (isCreator) {
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                try {
+                                    isSavingChanges = true
+
+                                    Firebase.firestore
+                                        .collection("reservations")
+                                        .document(reservationId)
+                                        .update(
+                                            mapOf(
+                                                "open" to openChecked,
+                                                "reservationDay" to editedDay,
+                                                "reservationHour" to editedHour
+                                            )
+                                        )
+                                        .await()
+
+                                    reservation = reservation?.copy(
+                                        open = openChecked,
+                                        reservationDay = editedDay,
+                                        reservationHour = editedHour
+                                    )
+
+                                    editingDateTime = false
+
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                } finally {
+                                    isSavingChanges = false
+                                }
+                            }
+                        },
+                        enabled = !isSavingChanges,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = Color.White
+                        )
+                    ) {
+                        if (isSavingChanges) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("Guardar cambios")
+                        }
+                    }
+                }
+
                 HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier.padding(vertical = 16.dp),
                     thickness = 1.dp,
                     color = Color.LightGray
                 )
@@ -258,6 +374,7 @@ fun ReservationDetailScreen(
                     }
                 }
 
+
                 Button(
                     onClick = {},
                     modifier = Modifier.fillMaxWidth(),
@@ -265,14 +382,13 @@ fun ReservationDetailScreen(
                     Text("Invitar contactos")
                 }
 
-                Button(
-                    onClick = {},
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    ),
-                ) {
-                    Text("Abrir convocatoria")
+                if (isCreator) {
+                    Button(
+                        onClick = {},
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text("Ver  convocados")
+                    }
                 }
 
                 Button(
