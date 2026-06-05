@@ -23,12 +23,6 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.input.pointer.pointerInput
-import android.location.Geocoder
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.util.Locale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
@@ -48,11 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Checkbox
 import com.google.firebase.auth.FirebaseAuth
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 
 @Composable
 fun ReservationDetailScreen(
@@ -95,10 +85,6 @@ fun ReservationDetailScreen(
             reservation = doc.toObject(Reservation::class.java)?.copy(
                 id = doc.id
             )
-
-            editedDay = reservation?.reservationDay ?: ""
-            editedHour = reservation?.reservationHour ?: ""
-            openChecked = reservation?.open ?: false
 
             val reservationData = reservation
 
@@ -151,8 +137,7 @@ fun ReservationDetailScreen(
         return
     }
 
-    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-    val isCreator = currentUserId == r.creatorId
+    /**val currentUserId = FirebaseAuth.getInstance().currentUser?.uid*/
 
     val mapPoint = r.placeLocation?.let {
         GeoPoint(it.latitude, it.longitude)
@@ -226,114 +211,8 @@ fun ReservationDetailScreen(
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
-                        if (editingDateTime) {
-                            OutlinedTextField(
-                                value = editedDay,
-                                onValueChange = { editedDay = it },
-                                label = { Text("Día") },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            OutlinedTextField(
-                                value = editedHour,
-                                onValueChange = { editedHour = it },
-                                label = { Text("Hora") },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        } else {
-                            Text("Día: $editedDay")
-                            Text("Hora: $editedHour hs")
-                        }
-                    }
-
-                    if (isCreator) {
-                        IconButton(
-                            onClick = {
-                                editingDateTime = !editingDateTime
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Editar día y hora"
-                            )
-                        }
-                    }
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if(isCreator) {
-                        Checkbox(
-                            checked = openChecked,
-                            onCheckedChange = { checked ->
-                                openChecked = checked
-                            },
-                        )
-                    }
-
-                    Text(
-                        text = if (openChecked) {
-                            "Convocatoria abierta"
-                        } else {
-                            "Convocatoria cerrada"
-                        }
-                    )
-                }
-
-                if (isCreator) {
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                try {
-                                    isSavingChanges = true
-
-                                    Firebase.firestore
-                                        .collection("reservations")
-                                        .document(reservationId)
-                                        .update(
-                                            mapOf(
-                                                "open" to openChecked,
-                                                "reservationDay" to editedDay,
-                                                "reservationHour" to editedHour
-                                            )
-                                        )
-                                        .await()
-
-                                    reservation = reservation?.copy(
-                                        open = openChecked,
-                                        reservationDay = editedDay,
-                                        reservationHour = editedHour
-                                    )
-
-                                    editingDateTime = false
-
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                } finally {
-                                    isSavingChanges = false
-                                }
-                            }
-                        },
-                        enabled = !isSavingChanges,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = Color.White
-                        )
-                    ) {
-                        if (isSavingChanges) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text("Guardar cambios")
-                        }
+                        Text("Día: ${reservation?.reservationDay}")
+                        Text("Hora: ${reservation?.reservationHour} hs")
                     }
                 }
 
@@ -381,15 +260,6 @@ fun ReservationDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text("Invitar contactos")
-                }
-
-                if (isCreator) {
-                    Button(
-                        onClick = {},
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Ver  convocados")
-                    }
                 }
 
                 Button(
