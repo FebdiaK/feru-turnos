@@ -20,6 +20,7 @@ import com.google.firebase.firestore.firestore
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import com.catedra.feruturnos.ui.contacts.ContactUser
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import kotlinx.coroutines.tasks.await

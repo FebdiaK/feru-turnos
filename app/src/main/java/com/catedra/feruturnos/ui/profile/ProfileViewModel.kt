@@ -2,7 +2,7 @@ package com.catedra.feruturnos.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.catedra.feruturnos.ui.home.ContactUser
+import com.catedra.feruturnos.ui.contacts.ContactUser
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
@@ -56,7 +56,8 @@ class ProfileViewModel : ViewModel() {
                         uid = it["uid"] as? String ?: "",
                         name = it["name"] as? String ?: "",
                         photo = it["photo"] as? String ?: "",
-                        contactId = it["contactId"] as? String ?: ""
+                        contactId = it["contactId"] as? String ?: "",
+                        celphone = (it["celphone"] as? Long)?.toInt() ?: 0
                     )
                 }
 

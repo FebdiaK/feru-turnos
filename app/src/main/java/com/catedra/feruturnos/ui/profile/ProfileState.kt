@@ -1,6 +1,6 @@
 package com.catedra.feruturnos.ui.profile
 
-import com.catedra.feruturnos.ui.home.ContactUser
+import com.catedra.feruturnos.ui.contacts.ContactUser
 
 data class ProfileState(
     val uid: String = "",

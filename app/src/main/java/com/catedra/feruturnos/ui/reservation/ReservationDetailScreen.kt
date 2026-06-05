@@ -41,7 +41,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import com.google.firebase.firestore.FieldValue
 import androidx.compose.material3.HorizontalDivider
-import com.catedra.feruturnos.ui.home.ContactUser
+import com.catedra.feruturnos.ui.contacts.ContactUser
 import coil.compose.AsyncImage
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
@@ -57,7 +57,8 @@ import androidx.compose.material3.OutlinedTextField
 @Composable
 fun ReservationDetailScreen(
     reservationId: String,
-    onReservationCancelled: () -> Unit
+    onReservationCancelled: () -> Unit,
+    onNavigateToContacts: (String) -> Unit
 ) {
 
     var reservation by remember { mutableStateOf<Reservation?>(null) }
@@ -376,7 +377,7 @@ fun ReservationDetailScreen(
 
 
                 Button(
-                    onClick = {},
+                    onClick = {onNavigateToContacts(reservationId)},
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text("Invitar contactos")

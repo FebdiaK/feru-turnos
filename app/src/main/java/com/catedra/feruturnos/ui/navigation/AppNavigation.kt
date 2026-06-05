@@ -57,6 +57,12 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.catedra.feruturnos.ui.enclosure.EnclosureDetailScreen
 import com.catedra.feruturnos.ui.profile.ProfileViewModel
 import androidx.compose.runtime.collectAsState
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.tasks.await
+import androidx.compose.runtime.rememberCoroutineScope
+import com.google.firebase.firestore.FieldValue
+import kotlinx.coroutines.launch
 
 object Rutas {
     const val HOME = "Inicio"
@@ -67,7 +73,12 @@ object Rutas {
     fun reservationDetail(id: String) = "reservation/$id"
     const val ENCLOSURE_DETAIL = "enclosure/{enclosureId}"
     fun enclosureDetail(id: String) = "enclosure/$id"
-    const val CONTACTS = "contacts"
+    const val CONTACTS = "contacts/{source}/{reservationId}"
+
+    fun contactsFromProfile() = "contacts/profile/none"
+
+    fun contactsFromReservation(reservationId: String) =
+        "contacts/reservation/$reservationId"
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -80,6 +91,7 @@ fun AppNavigation(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val rutaActual = backStackEntry?.destination?.route
     val mostrarVolver = rutaActual != Rutas.HOME
+    val scope = rememberCoroutineScope()
 
     val tituloActual = when (rutaActual) {
         Rutas.HOME -> "Inicio"
@@ -320,6 +332,9 @@ fun AppNavigation(
                     reservationId = reservationId,
                     onReservationCancelled = {
                         navController.popBackStack()
+                    },
+                    onNavigateToContacts = { id ->
+                        navController.navigate(Rutas.contactsFromReservation(id))
                     }
                 )
             }
@@ -357,18 +372,44 @@ fun AppNavigation(
             composable(Rutas.PROFILE) {
                 ProfileScreen(
                     onNavigateToContacts = {
-                        navController.navigate(Rutas.CONTACTS)
+                        navController.navigate(Rutas.contactsFromProfile())
                     }
                 )
             }
 
-            composable(Rutas.CONTACTS) {
-                val profileViewModel: ProfileViewModel = viewModel ()
+            composable(Rutas.CONTACTS) { backStackEntry ->
 
+                val source = backStackEntry.arguments?.getString("source") ?: "profile"
+                val reservationId = backStackEntry.arguments?.getString("reservationId") ?: "none"
+
+                val profileViewModel: ProfileViewModel = viewModel()
                 val profileState by profileViewModel.profileState.collectAsState()
 
                 ContactsScreen(
-                    contacts = profileState.friends
+                    contacts = profileState.friends,
+                    isInviting = source == "reservation",
+                    onInviteClick = { selectedContacts ->
+
+                        if (source == "reservation" && reservationId != "none") {
+
+                            scope.launch {
+
+                                val participantIds = selectedContacts.map { it.uid }
+
+                                Firebase.firestore
+                                    .collection("reservations")
+                                    .document(reservationId)
+                                    .update(
+                                        "participantsId",
+                                        FieldValue.arrayUnion(*participantIds.toTypedArray())
+                                    )
+                                    .await()
+
+                                navController.popBackStack()
+                            }
+
+                        } else { }
+                    }
                 )
             }
 
