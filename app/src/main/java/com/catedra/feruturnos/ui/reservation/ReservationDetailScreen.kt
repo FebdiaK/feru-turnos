@@ -23,18 +23,13 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import com.google.firebase.firestore.FieldValue
-import androidx.compose.material3.HorizontalDivider
 import com.catedra.feruturnos.ui.contacts.ContactUser
 import coil.compose.AsyncImage
 import androidx.compose.foundation.shape.CircleShape
@@ -43,6 +38,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.GroupAdd
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
 
 @Composable
 fun ReservationDetailScreen(
@@ -60,12 +65,6 @@ fun ReservationDetailScreen(
 
     val scope = rememberCoroutineScope()
     val context = androidx.compose.ui.platform.LocalContext.current
-
-    var editedDay by remember { mutableStateOf("") }
-    var editedHour by remember { mutableStateOf("") }
-    var editingDateTime by remember { mutableStateOf(false) }
-    var openChecked by remember { mutableStateOf(false) }
-    var isSavingChanges by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         Configuration.getInstance().apply {
@@ -137,7 +136,9 @@ fun ReservationDetailScreen(
         return
     }
 
-    /**val currentUserId = FirebaseAuth.getInstance().currentUser?.uid*/
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+    val isCreator = currentUserId == r.creatorId
+
 
     val mapPoint = r.placeLocation?.let {
         GeoPoint(it.latitude, it.longitude)
@@ -153,27 +154,7 @@ fun ReservationDetailScreen(
                 snippet = r.placeFieldType,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(250.dp)
-            )
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.secondary)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = r.placeName,
-                color = Color.White,
-                modifier = Modifier.weight(2f)
-            )
-
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "Ir",
-                tint = Color.White
+                    .height(230.dp)
             )
         }
 
@@ -182,142 +163,219 @@ fun ReservationDetailScreen(
                 .fillMaxWidth()
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 0.dp)
         ) {
 
-            Column(
-                modifier = Modifier.padding(16.dp)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(
+                    topStart = 0.dp,
+                    topEnd = 0.dp,
+                    bottomStart = 16.dp,
+                    bottomEnd = 16.dp
+                ),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                elevation = CardDefaults.cardElevation(8.dp)
             ) {
-
-                Text("Dirección: ${r.placeAddress}")
-                Text("Cancha: ${r.placeFieldType}")
-                Text("Precio total: $${r.placeFieldPrice}")
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    thickness = 1.dp,
-                    color = Color.LightGray
-                )
-                Text("Creador de reserva")
-                Text("${r.reservationCreatorName} - Tel: ${r.reservationCreatorPhone}")
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    thickness = 1.dp,
-                    color = Color.LightGray
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            horizontal = 20.dp,
+                            vertical = 16.dp
+                        )
                 ) {
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Día: ${reservation?.reservationDay}")
-                        Text("Hora: ${reservation?.reservationHour} hs")
-                    }
+
+                    Text(
+                        text = r.placeName,
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = r.placeAddress,
+                        color = Color.White.copy(alpha = 0.85f),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
+            }
 
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    thickness = 1.dp,
-                    color = Color.LightGray
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                elevation = CardDefaults.cardElevation(4.dp)
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+
+                    DetailRow(
+                        icon = Icons.Default.LocationOn,
+                        title = "Cancha",
+                        value = r.placeFieldType
+                    )
+
+                    DetailRow(
+                        icon = Icons.Default.AttachMoney,
+                        title = "Precio total",
+                        value = "$${r.placeFieldPrice}"
+                    )
+
+                    DetailRow(
+                        icon = Icons.Default.CalendarMonth,
+                        title = "Fecha y hora",
+                        value = "${r.reservationDay} - ${r.reservationHour} hs"
+                    )
+
+                    DetailRow(
+                        icon = Icons.Default.Person,
+                        title = "Creador",
+                        value = "${r.reservationCreatorName} · Tel: ${r.reservationCreatorPhone}"
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = "Participantes",
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (participants.isEmpty()) {
+                Text(
+                    text = "Todavía no hay participantes invitados.",
+                    color = Color.Gray
                 )
-                Text("Participantes")
-                Spacer(modifier = Modifier.height(8.dp))
-
+            } else {
                 participants.forEach { participant ->
-
-                    Row(
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(vertical = 6.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(2.dp)
                     ) {
-
-                        AsyncImage(
-                            model = participant.photo,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Column {
-                            Text(participant.name)
-                            Text(
-                                "#${participant.contactId}",
-                                style = MaterialTheme.typography.bodySmall
+                        Row(
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            AsyncImage(
+                                model = participant.photo,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
                             )
-                        }
-                    }
-                }
 
+                            Spacer(modifier = Modifier.width(12.dp))
 
-                Button(
-                    onClick = {onNavigateToContacts(reservationId)},
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Invitar contactos")
-                }
-
-                Button(
-                    onClick = {
-                        scope.launch {
-                            try {
-                                isCancelling = true
-
-                                val relatedUsers = r.participantsId.map { participantId ->
-                                    mapOf(
-                                        "userId" to participantId,
-                                        "read" to false
-                                    )
-                                }
-
-                                Firebase.firestore
-                                    .collection("notifications")
-                                    .add(
-                                        hashMapOf(
-                                            "title" to "Reserva cancelada",
-                                            "message" to "La reserva de ${r.placeFieldType} en ${r.placeName} se ha cancelado.",
-                                            "reservationId" to r.id,
-                                            "relatedUsers" to relatedUsers,
-                                            "createdAt" to FieldValue.serverTimestamp()
-                                        )
-                                    )
-                                    .await()
-
-                                Firebase.firestore
-                                    .collection("reservations")
-                                    .document(reservationId)
-                                    .delete()
-                                    .await()
-
-                                onReservationCancelled()
-
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                isCancelling = false
+                            Column {
+                                Text(
+                                    text = participant.name,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Text(
+                                    text = "#${participant.contactId}",
+                                    color = Color.Gray,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
                             }
                         }
-                    },
-                    enabled = !isCancelling,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Red,
-                        contentColor = Color.White
-                    )
-                ) {
-                    if (isCancelling) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = Color.White,
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Text("Cancelar reserva")
                     }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Button(
+                onClick = { onNavigateToContacts(reservationId) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = Color.White
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.GroupAdd,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Invitar participantes")
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Button(
+                onClick = {
+                    scope.launch {
+                        try {
+                            isCancelling = true
+
+                            val relatedUsers = r.participantsId.map { participantId ->
+                                mapOf(
+                                    "userId" to participantId,
+                                    "read" to false
+                                )
+                            }
+
+                            Firebase.firestore
+                                .collection("notifications")
+                                .add(
+                                    hashMapOf(
+                                        "title" to "Reserva cancelada",
+                                        "message" to "La reserva de ${r.placeFieldType} en ${r.placeName} se ha cancelado.",
+                                        "reservationId" to r.id,
+                                        "relatedUsers" to relatedUsers,
+                                        "createdAt" to FieldValue.serverTimestamp()
+                                    )
+                                )
+                                .await()
+
+                            Firebase.firestore
+                                .collection("reservations")
+                                .document(reservationId)
+                                .delete()
+                                .await()
+
+                            onReservationCancelled()
+
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            isCancelling = false
+                        }
+                    }
+                },
+                enabled = !isCancelling,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Red,
+                    contentColor = Color.White
+                )
+            ) {
+                val deleteTextBtn = if (isCreator) "Cancelar reserva" else "Darse de baja"
+
+                if (isCancelling) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(deleteTextBtn)
                 }
             }
         }
@@ -373,5 +431,40 @@ fun FixedReservationMap(
                     }
                 }
         )
+    }
+}
+
+@Composable
+fun DetailRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.size(26.dp)
+        )
+
+        Spacer(modifier = Modifier.width(14.dp))
+
+        Column {
+            Text(
+                text = title,
+                color = Color.Gray,
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
     }
 }
