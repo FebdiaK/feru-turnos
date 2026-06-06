@@ -67,6 +67,8 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.runtime.LaunchedEffect
 import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 
 object Rutas {
     const val HOME = "Inicio"
@@ -97,6 +99,7 @@ fun AppNavigation(
     val rutaActual = backStackEntry?.destination?.route
     val mostrarVolver = rutaActual != Rutas.HOME
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var unreadNotificationsCount by remember { mutableStateOf(0) }
 
@@ -137,6 +140,9 @@ fun AppNavigation(
     )
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             TopAppBar(
                 title = { Text(tituloActual) },
@@ -375,8 +381,13 @@ fun AppNavigation(
 
                 ReservationDetailScreen(
                     reservationId = reservationId,
-                    onReservationCancelled = {
+                    onReservationCancelled = { message ->
+
                         navController.popBackStack()
+
+                        scope.launch {
+                            snackbarHostState.showSnackbar(message)
+                        }
                     },
                     onNavigateToContacts = { id ->
                         navController.navigate(Rutas.contactsFromReservation(id))

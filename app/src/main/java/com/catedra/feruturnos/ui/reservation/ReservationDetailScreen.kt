@@ -52,7 +52,7 @@ import androidx.compose.material3.Icon
 @Composable
 fun ReservationDetailScreen(
     reservationId: String,
-    onReservationCancelled: () -> Unit,
+    onReservationCancelled: (String) -> Unit,
     onNavigateToContacts: (String) -> Unit
 ) {
 
@@ -163,7 +163,7 @@ fun ReservationDetailScreen(
                 .fillMaxWidth()
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 0.dp)
+                .padding(16.dp)
         ) {
 
             Card(
@@ -311,7 +311,7 @@ fun ReservationDetailScreen(
                     contentDescription = null
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Invitar participantes")
+                Text("Invitar contactos")
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -349,7 +349,7 @@ fun ReservationDetailScreen(
                                     .delete()
                                     .await()
 
-                                onReservationCancelled()
+                                onReservationCancelled("Reserva eliminada correctamente")
                             } else {
                                 val uid = FirebaseAuth.getInstance().currentUser?.uid
 
@@ -368,7 +368,7 @@ fun ReservationDetailScreen(
                                     )
                                     .await()
 
-                                onReservationCancelled()
+                                onReservationCancelled("Baja ejecutada correctamente")
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
