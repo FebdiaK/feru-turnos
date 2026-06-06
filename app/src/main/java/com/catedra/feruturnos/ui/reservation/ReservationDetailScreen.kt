@@ -322,34 +322,54 @@ fun ReservationDetailScreen(
                         try {
                             isCancelling = true
 
-                            val relatedUsers = r.participantsId.map { participantId ->
-                                mapOf(
-                                    "userId" to participantId,
-                                    "read" to false
-                                )
-                            }
-
-                            Firebase.firestore
-                                .collection("notifications")
-                                .add(
-                                    hashMapOf(
-                                        "title" to "Reserva cancelada",
-                                        "message" to "La reserva de ${r.placeFieldType} en ${r.placeName} se ha cancelado.",
-                                        "reservationId" to r.id,
-                                        "relatedUsers" to relatedUsers,
-                                        "createdAt" to FieldValue.serverTimestamp()
+                            if (isCreator) {
+                                val relatedUsers = r.participantsId.map { participantId ->
+                                    mapOf(
+                                        "userId" to participantId,
+                                        "read" to false
                                     )
-                                )
-                                .await()
+                                }
 
-                            Firebase.firestore
-                                .collection("reservations")
-                                .document(reservationId)
-                                .delete()
-                                .await()
+                                Firebase.firestore
+                                    .collection("notifications")
+                                    .add(
+                                        hashMapOf(
+                                            "title" to "Reserva cancelada",
+                                            "message" to "La reserva de ${r.placeFieldType} en ${r.placeName} se ha cancelado.",
+                                            "reservationId" to r.id,
+                                            "relatedUsers" to relatedUsers,
+                                            "createdAt" to FieldValue.serverTimestamp()
+                                        )
+                                    )
+                                    .await()
 
-                            onReservationCancelled()
+                                Firebase.firestore
+                                    .collection("reservations")
+                                    .document(reservationId)
+                                    .delete()
+                                    .await()
 
+                                onReservationCancelled()
+                            } else {
+                                val uid = FirebaseAuth.getInstance().currentUser?.uid
+
+                                if (uid == null) {
+                                    isCancelling = false
+                                    return@launch
+                                }
+
+                                Firebase.firestore
+                                    .collection("reservations")
+                                    .document(reservationId)
+                                    .update(
+                                        mapOf(
+                                            "participantsId" to FieldValue.arrayRemove(uid)
+                                        )
+                                    )
+                                    .await()
+
+                                onReservationCancelled()
+                            }
                         } catch (e: Exception) {
                             e.printStackTrace()
                             isCancelling = false

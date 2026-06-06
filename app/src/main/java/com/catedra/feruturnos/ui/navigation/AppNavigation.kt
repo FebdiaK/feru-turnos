@@ -394,7 +394,6 @@ fun AppNavigation(
                         if (source == "reservation" && reservationId != "none") {
 
                             scope.launch {
-
                                 val participantIds = selectedContacts.map { it.uid }
 
                                 Firebase.firestore
@@ -406,10 +405,29 @@ fun AppNavigation(
                                     )
                                     .await()
 
+                                val relatedUsers = selectedContacts.map { contact ->
+                                    hashMapOf(
+                                        "userId" to contact.uid,
+                                        "read" to false
+                                    )
+                                }
+
+                                Firebase.firestore
+                                    .collection("notifications")
+                                    .add(
+                                        hashMapOf(
+                                            "title" to "Nueva invitación",
+                                            "message" to "Fuiste invitado a una reserva.",
+                                            "reservationId" to reservationId,
+                                            "relatedUsers" to relatedUsers,
+                                            "createdAt" to FieldValue.serverTimestamp()
+                                        )
+                                    )
+                                    .await()
+
                                 navController.popBackStack()
                             }
-
-                        } else { }
+                        }
                     }
                 )
             }
