@@ -150,6 +150,7 @@ fun EnclosureDetailContent(
     val isPreview = LocalInspectionMode.current
     val auth = remember { if (isPreview) null else FirebaseAuth.getInstance() }
     var reservationName by remember { mutableStateOf("Reserva de: ...") }
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     LaunchedEffect(Unit) {
         val uid = auth?.currentUser?.uid
@@ -226,6 +227,7 @@ fun EnclosureDetailContent(
                                     selectedHour    = selectedHour!!,
                                     reservationName = reservationName
                                 )
+                                mostrarNotificacionReservaCreada(context, id)
                                 showConfirmDialog = false
                                 snackbarHostState.showSnackbar("¡Reserva creada correctamente!")
                                 onReservationCreated(id)
@@ -483,6 +485,47 @@ private fun SummaryRow(label: String, value: String) {
     }
 }
 
+private fun mostrarNotificacionReservaCreada(
+    context: android.content.Context,
+    reservationId: String
+) {
+    val channelId = "feru_reservas"
+
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        val channel = android.app.NotificationChannel(
+            channelId,
+            "Reservas",
+            android.app.NotificationManager.IMPORTANCE_HIGH
+        )
+
+        val manager = context.getSystemService(android.app.NotificationManager::class.java)
+        manager.createNotificationChannel(channel)
+    }
+
+    val intent = android.content.Intent(context, com.catedra.feruturnos.MainActivity::class.java).apply {
+        flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+        putExtra("openNotifications", true)
+    }
+
+    val pendingIntent = android.app.PendingIntent.getActivity(
+        context,
+        reservationId.hashCode(),
+        intent,
+        android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+    )
+
+    val notification = androidx.core.app.NotificationCompat.Builder(context, channelId)
+        .setSmallIcon(com.catedra.feruturnos.R.drawable.logo_medium)
+        .setContentTitle("Reserva creada con éxito")
+        .setContentText("Tocá para ver tus notificaciones.")
+        .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+        .setContentIntent(pendingIntent)
+        .setAutoCancel(true)
+        .build()
+
+    androidx.core.app.NotificationManagerCompat.from(context)
+        .notify(reservationId.hashCode(), notification)
+}
 
 private val previewEnclosure = EnclosureItem(
     id = "1",

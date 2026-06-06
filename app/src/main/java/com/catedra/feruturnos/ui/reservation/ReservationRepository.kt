@@ -58,6 +58,24 @@ class ReservationRepository {
         )
 
         val docRef = db.collection("reservations").add(data).await()
+
+        db.collection("notifications")
+            .add(
+                hashMapOf(
+                    "title" to "Reserva creada con éxito",
+                    "message" to "Tu reserva en ${enclosure.name} para ${field.type} el $selectedDay a las $selectedHour hs fue creada correctamente.",
+                    "reservationId" to docRef.id,
+                    "relatedUsers" to listOf(
+                        hashMapOf(
+                            "userId" to user.uid,
+                            "read" to false
+                        )
+                    ),
+                    "createdAt" to Timestamp.now()
+                )
+            )
+            .await()
+
         return docRef.id
     }
 }

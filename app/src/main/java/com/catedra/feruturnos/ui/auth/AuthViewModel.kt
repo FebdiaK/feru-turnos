@@ -21,6 +21,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
+import com.google.firebase.messaging.FirebaseMessaging
 
 class AuthViewModel : ViewModel() {
     private val auth = Firebase.auth
@@ -41,6 +42,17 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 auth.signInWithEmailAndPassword(email, password).await()
+
+                val uid = auth.currentUser?.uid
+
+                if (uid != null) {
+                    FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                        db.collection("users")
+                            .document(uid)
+                            .update("fcmToken", token)
+                    }
+                }
+
                 _authState.value = AuthState.Autenticado
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Error al iniciar sesión")
@@ -88,6 +100,12 @@ class AuthViewModel : ViewModel() {
                     .document(uid)
                     .set(usuario)
                     .await()
+
+                FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                    db.collection("users")
+                        .document(uid)
+                        .update("fcmToken", token)
+                }
 
                 _authState.value = AuthState.Autenticado
 

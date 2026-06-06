@@ -18,6 +18,9 @@ import com.catedra.feruturnos.ui.auth.RegisterScreen
 import com.catedra.feruturnos.ui.navigation.AppNavigation
 import com.catedra.feruturnos.ui.theme.FeruTurnosTheme
 import androidx.compose.ui.platform.LocalContext
+import android.Manifest
+import android.os.Build
+import androidx.core.app.ActivityCompat
 
 class MainActivity : ComponentActivity() {
 
@@ -26,6 +29,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                1001
+            )
+        }
 
         setContent {
             FeruTurnosTheme {
@@ -79,6 +90,11 @@ class MainActivity : ComponentActivity() {
 
                     is AuthState.Autenticado -> {
                         AppNavigation(
+                            startDestination = if (intent.getBooleanExtra("openNotifications", false)) {
+                                "Notificaciones"
+                            } else {
+                                "Inicio"
+                            },
                             onCerrarSesion = {
                                 authViewModel.cerrarSesion()
                             }

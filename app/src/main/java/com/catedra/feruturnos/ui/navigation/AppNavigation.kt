@@ -84,6 +84,7 @@ object Rutas {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun AppNavigation(
+    startDestination: String = Rutas.HOME,
     onCerrarSesion: () -> Unit
 ) {
     val navController = rememberNavController()
@@ -307,7 +308,7 @@ fun AppNavigation(
 
         NavHost(
             navController = navController,
-            startDestination = Rutas.HOME,
+            startDestination = startDestination,
             modifier = Modifier.padding(padding)
         ) {
             composable(Rutas.HOME) {
