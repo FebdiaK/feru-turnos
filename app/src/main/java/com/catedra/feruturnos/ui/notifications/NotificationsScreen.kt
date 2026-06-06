@@ -95,13 +95,6 @@ fun NotificationsScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("No tenés notificaciones")
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "UID actual: ${uid ?: "sin uid"}",
-                style = MaterialTheme.typography.bodySmall
-            )
         }
         return
     }

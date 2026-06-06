@@ -25,6 +25,18 @@ fun ContactsScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
+        if (contacts.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("No tenés contactos agregados")
+            }
+            return
+        }
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(

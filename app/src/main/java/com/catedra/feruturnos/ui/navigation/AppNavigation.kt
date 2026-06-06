@@ -63,6 +63,10 @@ import kotlinx.coroutines.tasks.await
 import androidx.compose.runtime.rememberCoroutineScope
 import com.google.firebase.firestore.FieldValue
 import kotlinx.coroutines.launch
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.runtime.LaunchedEffect
+import com.google.firebase.auth.FirebaseAuth
 
 object Rutas {
     const val HOME = "Inicio"
@@ -93,6 +97,28 @@ fun AppNavigation(
     val rutaActual = backStackEntry?.destination?.route
     val mostrarVolver = rutaActual != Rutas.HOME
     val scope = rememberCoroutineScope()
+
+    var unreadNotificationsCount by remember { mutableStateOf(0) }
+
+    LaunchedEffect (Unit) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@LaunchedEffect
+
+        Firebase.firestore
+            .collection("notifications")
+            .addSnapshotListener { snapshot, _ ->
+
+                val count = snapshot?.documents?.count { document ->
+                    val relatedUsers = document.get("relatedUsers") as? List<Map<String, Any>>
+                        ?: emptyList()
+
+                    relatedUsers.any { user ->
+                        user["userId"] == uid && user["read"] == false
+                    }
+                } ?: 0
+
+                unreadNotificationsCount = count
+            }
+    }
 
     val tituloActual = when (rutaActual) {
         Rutas.HOME -> "Inicio"
@@ -146,18 +172,36 @@ fun AppNavigation(
                     }
 
                     IconButton(onClick = { navController.navigate(Rutas.NOTIFICATIONS) }) {
-                        Icon(
-                            modifier = if (rutaActual == Rutas.NOTIFICATIONS) {
-                                Modifier.shadow(
-                                    elevation = 12.dp,
-                                    shape = CircleShape,
-                                    spotColor = Color.Black
-                                )
-                            } else { Modifier },
-                            imageVector = Icons.Default.Notifications,
-                            contentDescription = "Notificaciones",
-                            tint = Color.White
-                        )
+                        BadgedBox(
+                            badge = {
+                                if (unreadNotificationsCount > 0) {
+                                    Badge {
+                                        Text(
+                                            text = if (unreadNotificationsCount > 99) {
+                                                "99+"
+                                            } else {
+                                                unreadNotificationsCount.toString()
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                modifier = if (rutaActual == Rutas.NOTIFICATIONS) {
+                                    Modifier.shadow(
+                                        elevation = 12.dp,
+                                        shape = CircleShape,
+                                        spotColor = Color.Black
+                                    )
+                                } else {
+                                    Modifier
+                                },
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = "Notificaciones",
+                                tint = Color.White
+                            )
+                        }
                     }
 
                     IconButton(onClick = {
