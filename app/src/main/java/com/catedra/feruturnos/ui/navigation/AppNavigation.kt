@@ -69,11 +69,20 @@ import androidx.compose.runtime.LaunchedEffect
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.res.stringResource
+import com.catedra.feruturnos.ui.settings.SettingsScreen
+import com.catedra.feruturnos.R
+import androidx.compose.material.icons.filled.Settings
 
 object Rutas {
     const val HOME = "Inicio"
     const val SEARCH = "Búsqueda"
     const val PROFILE = "Perfil"
+    const val SETTINGS = "Configuración"
     const val NOTIFICATIONS = "Notificaciones"
     const val RESERVATION_DETAIL = "reservation/{reservationId}"
     fun reservationDetail(id: String) = "reservation/$id"
@@ -100,6 +109,8 @@ fun AppNavigation(
     val mostrarVolver = rutaActual != Rutas.HOME
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val profileViewModel: ProfileViewModel = viewModel()
+    val profileState by profileViewModel.profileState.collectAsState()
 
     var unreadNotificationsCount by remember { mutableStateOf(0) }
 
@@ -124,13 +135,14 @@ fun AppNavigation(
     }
 
     val tituloActual = when (rutaActual) {
-        Rutas.HOME -> "Inicio"
-        Rutas.SEARCH -> "Búsqueda"
-        Rutas.ENCLOSURE_DETAIL -> "Predio"
-        Rutas.PROFILE -> "Perfil"
-        Rutas.CONTACTS -> "Contactos"
-        Rutas.NOTIFICATIONS -> "Notificaciones"
-        Rutas.RESERVATION_DETAIL -> "Reserva"
+        Rutas.HOME -> stringResource(R.string.inicio)
+        Rutas.SEARCH -> stringResource(R.string.busqueda)
+        Rutas.ENCLOSURE_DETAIL -> stringResource(R.string.predio)
+        Rutas.PROFILE -> stringResource(R.string.perfil)
+        Rutas.SETTINGS -> stringResource(R.string.configuracion)
+        Rutas.CONTACTS -> stringResource(R.string.contactos)
+        Rutas.NOTIFICATIONS -> stringResource(R.string.notificaciones)
+        Rutas.RESERVATION_DETAIL -> stringResource(R.string.reserva)
         else -> ""
     }
 
@@ -174,8 +186,21 @@ fun AppNavigation(
                                     contentDescription = "Cerrar sesión"
                                 )
                             }
+
+                            IconButton(
+                                onClick = {
+                                    navController.navigate(Rutas.SETTINGS)
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "Configuración",
+                                    tint = Color.White
+                                )
+                            }
                         }
                     }
+
 
                     IconButton(onClick = { navController.navigate(Rutas.NOTIFICATIONS) }) {
                         BadgedBox(
@@ -210,91 +235,98 @@ fun AppNavigation(
                         }
                     }
 
-                    IconButton(onClick = {
-                        if (rutaActual != Rutas.PROFILE) navController.navigate(Rutas.PROFILE)
-                    }) {
-                        Icon(
-                            Icons.Default.AccountCircle,
-                            contentDescription = "Perfil"
-                        )
+                    IconButton(
+                        onClick = {
+                            if (rutaActual != Rutas.PROFILE) {
+                                navController.navigate(Rutas.PROFILE)
+                            }
+                        }
+                    ) {
+
+                        if (profileState.photo.isNotBlank()) {
+
+                            AsyncImage(
+                                model = profileState.photo,
+                                contentDescription = "Perfil",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                            )
+
+                        } else {
+
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "Perfil",
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
             )
         },
         bottomBar = {
-            NavigationBar (containerColor = MaterialTheme.colorScheme.secondary){
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.secondary
+            ) {
                 NavigationBarItem(
                     selected = rutaActual == Rutas.HOME,
                     onClick = {
-                        navController.navigate(Rutas.HOME)
+                        if (rutaActual != Rutas.HOME) {
+                            navController.navigate(Rutas.HOME)
+                        }
                     },
-                    icon = { Icon( Icons.Default.Home, contentDescription = null,) },
+                    icon = {
+                        Icon(Icons.Default.Home, contentDescription = null)
+                    },
                     label = { Text("Inicio") },
-                    modifier = if (rutaActual == Rutas.HOME) {
-                        Modifier.shadow(
-                            elevation = 1.dp,
-                            shape = CircleShape,
-                            spotColor = Color.Black
-                        )
-                    } else {
-                        Modifier
-                    },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.White,
-                        selectedTextColor = Color.White,
-                        unselectedIconColor = Color.White,
-                        unselectedTextColor = Color.White,
-                        indicatorColor = Color.Transparent
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = Color.White.copy(alpha = 0.75f),
+                        unselectedIconColor = Color.White.copy(alpha = 0.75f),
+                        unselectedTextColor = Color.White.copy(alpha = 0.75f),
+                        indicatorColor = Color.White
                     )
                 )
 
                 NavigationBarItem(
                     selected = rutaActual == Rutas.SEARCH,
                     onClick = {
-                        navController.navigate(Rutas.SEARCH)
+                        if (rutaActual != Rutas.SEARCH) {
+                            navController.navigate(Rutas.SEARCH)
+                        }
                     },
-                    icon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    label = { Text("Búsqueda") },
-                    modifier = if (rutaActual == Rutas.SEARCH) {
-                        Modifier.shadow(
-                            elevation = 1.dp,
-                            shape = CircleShape,
-                            spotColor = Color.Black
-                        )
-                    } else {
-                        Modifier
+                    icon = {
+                        Icon(Icons.Default.Search, contentDescription = null)
                     },
+                    label = { Text("Buscar") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.White,
-                        selectedTextColor = Color.White,
-                        unselectedIconColor = Color.White,
-                        unselectedTextColor = Color.White,
-                        indicatorColor = Color.Transparent
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = Color.White.copy(alpha = 0.75f),
+                        unselectedIconColor = Color.White.copy(alpha = 0.75f),
+                        unselectedTextColor = Color.White.copy(alpha = 0.75f),
+                        indicatorColor = Color.White
                     )
                 )
 
                 NavigationBarItem(
                     selected = rutaActual == Rutas.PROFILE,
                     onClick = {
-                        navController.navigate(Rutas.PROFILE)
+                        if (rutaActual != Rutas.PROFILE) {
+                            navController.navigate(Rutas.PROFILE)
+                        }
                     },
-                    icon = { Icon(Icons.Default.Person, contentDescription = null) },
+                    icon = {
+                        Icon(Icons.Default.Person, contentDescription = null)
+                    },
                     label = { Text("Perfil") },
-                    modifier = if (rutaActual == Rutas.PROFILE) {
-                        Modifier.shadow(
-                            elevation = 1.dp,
-                            shape = CircleShape,
-                            spotColor = Color.Black
-                        )
-                    } else {
-                        Modifier
-                    },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.White,
-                        selectedTextColor = Color.White,
-                        unselectedIconColor = Color.White,
-                        unselectedTextColor = Color.White,
-                        indicatorColor = Color.Transparent
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = Color.White.copy(alpha = 0.75f),
+                        unselectedIconColor = Color.White.copy(alpha = 0.75f),
+                        unselectedTextColor = Color.White.copy(alpha = 0.75f),
+                        indicatorColor = Color.White
                     )
                 )
             }
@@ -431,6 +463,10 @@ fun AppNavigation(
                         navController.navigate(Rutas.contactsFromProfile())
                     }
                 )
+            }
+
+            composable(Rutas.SETTINGS) {
+                SettingsScreen()
             }
 
             composable(Rutas.CONTACTS) { backStackEntry ->

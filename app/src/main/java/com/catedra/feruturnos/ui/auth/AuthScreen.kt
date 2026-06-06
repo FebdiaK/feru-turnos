@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.catedra.feruturnos.R
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun AuthScreen(
@@ -49,7 +50,7 @@ fun AuthScreen(
             modifier = Modifier.padding(bottom = 32.dp)
         )
         Text(
-            text = "Iniciar Sesion",
+            text = stringResource(R.string.iniciar_sesion),
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 32.dp)
         )

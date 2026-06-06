@@ -21,10 +21,19 @@ import androidx.compose.ui.platform.LocalContext
 import android.Manifest
 import android.os.Build
 import androidx.core.app.ActivityCompat
+import android.content.Context
+import com.catedra.feruturnos.ui.settings.LanguagePreferences
+import com.catedra.feruturnos.ui.settings.LocaleHelper
 
 class MainActivity : ComponentActivity() {
 
     private val authViewModel: AuthViewModel by viewModels()
+
+    override fun attachBaseContext(newBase: Context) {
+        val language = LanguagePreferences.getLanguage(newBase)
+        val context = LocaleHelper.applyLanguage(newBase, language)
+        super.attachBaseContext(context)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

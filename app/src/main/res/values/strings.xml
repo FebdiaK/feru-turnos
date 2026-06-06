@@ -1,3 +1,18 @@
 <resources>
-    <string name="app_name">FeruTurnos</string>
+    <string name="nombre_app">Feru Turnos</string>
+
+    <string name="iniciar_sesion">Iniciar Sesion</string>
+
+    <string name="inicio">Inicio</string>
+    <string name="busqueda">Búsqueda</string>
+    <string name="predio">Predio</string>
+    <string name="perfil">Perfil</string>
+    <string name="configuracion">Configuración</string>
+    <string name="contactos">Contactos</string>
+    <string name="notificaciones">Notificaciones</string>
+    <string name="reserva">Notificaciones</string>
+
+    <string name="language">Idioma</string>
+    <string name="spanish">Español</string>
+    <string name="english">Inglés</string>
 </resources>
