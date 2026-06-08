@@ -44,6 +44,52 @@
     <string name="predio_cercano">"Predio cercano</string>
     <string name="tu_ubicacion">Estás acá</string>
     <string name="estas_aca">Tu ubicación</string>
+    <string name="cerrar_sesion">Cerrar sesión</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="seguro_que_queres_cerrar_sesion">¿Seguro que querés cerrar sesión?</string>
+    <string name="confirmar">Confirmar</string>
+    <string name="volver">Volver</string>
+    <string name="nueva_invitacion">Nueva invitación</string>
+    <string name="fuiste_invitado_a_una_reserva">Fuiste invitado a una reserva.</string>
+
+    <string name="no_se_encontro_la_reserva">No se encontró la reserva</string>
+    <string name="reserva_cancelada">Reserva cancelada</string>
+    <string name="mensaje_reserva_cancelada">La reserva de %1$s en %2$s se ha cancelado.</string>
+    <string name="cancha">Cancha</string>
+    <string name="precio_total">Precio total</string>
+    <string name="fecha_y_hora">Fecha y hora</string>
+    <string name="creador">Creador</string>
+    <string name="participantes">Participantes</string>
+    <string name="todavia_no_hay_participantes_invitados">Todavía no hay participantes invitados.</string>
+    <string name="invitar_contactos">Invitar contactos</string>
+    <string name="reserva_eliminada_correctamente">Reserva eliminada correctamente</string>
+    <string name="baja_ejecutada_correctamente">Baja ejecutada correctamente</string>
+    <string name="cancelar_reserva">"Cancelar reserva</string>
+    <string name="darse_de_baja">Darse de baja</string>
+    <string name="no_hay_sesion_activa">No hay sesión activa</string>
+    <string name="usuario">Usuario</string>
+    <string name="reserva_creada_con_exito">Reserva creada con éxito</string>
+    <string name="mensaje_reserva_creada">Tu reserva en %1$s para %2$s el %3$s a las %4$s hs fue creada correctamente.</string>
+
+    <string name="no_se_encontro_el_predio">No se encontró el predio</string>
+    <string name="nombre_de">Reserva de</string>
+    <string name="confirmar_reserva">Confirmar reserva</string>
+    <string name="dia">Día</string>
+    <string name="horario">Horario</string>
+    <string name="total">Total</string>
+    <string name="reserva_de">Reserva de</string>
+
+    <string name="nombre_reserva">Nombre de la reserva</string>
+
+    <string name="reserva_creada_correctamente">¡Reserva creada correctamente!</string>
+    <string name="error_crear_reserva">No se pudo crear la reserva</string>
+    <string name="error">Error: %1$s</string>
+
+    <string name="elegi_una_cancha">Elegí una cancha</string>
+    <string name="resumen_reserva">Resumen de reserva</string>
+
+    <string name="reservas">Reservas</string>
+    <string name="toca_para_ver_notificaciones">Tocá para ver tus notificaciones.</string>
 
 
 

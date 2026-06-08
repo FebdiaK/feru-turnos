@@ -48,6 +48,8 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
+import androidx.compose.ui.res.stringResource
+import com.catedra.feruturnos.R
 
 @Composable
 fun ReservationDetailScreen(
@@ -130,7 +132,7 @@ fun ReservationDetailScreen(
 
     if (r == null) {
         Text(
-            text = "No se encontró la reserva",
+            text = stringResource(R.string.no_se_encontro_la_reserva),
             modifier = Modifier.padding(36.dp)
         )
         return
@@ -143,6 +145,24 @@ fun ReservationDetailScreen(
     val mapPoint = r.placeLocation?.let {
         GeoPoint(it.latitude, it.longitude)
     }
+
+    val titleCancelled = stringResource(R.string.reserva_cancelada)
+    val messageCancelled = stringResource(
+        R.string.mensaje_reserva_cancelada,
+        r.placeFieldType,
+        r.placeName
+    )
+    val reservationDeletedSuccessfully =
+        stringResource(R.string.reserva_eliminada_correctamente)
+
+    val leaveSuccessfully =
+        stringResource(R.string.baja_ejecutada_correctamente)
+
+    val cancelReservationText =
+        stringResource(R.string.cancelar_reserva)
+
+    val unsubscribeText =
+        stringResource(R.string.darse_de_baja)
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -215,25 +235,25 @@ fun ReservationDetailScreen(
 
                     DetailRow(
                         icon = Icons.Default.LocationOn,
-                        title = "Cancha",
+                        title = stringResource(R.string.cancha),
                         value = r.placeFieldType
                     )
 
                     DetailRow(
                         icon = Icons.Default.AttachMoney,
-                        title = "Precio total",
+                        title = stringResource(R.string.precio_total),
                         value = "$${r.placeFieldPrice}"
                     )
 
                     DetailRow(
                         icon = Icons.Default.CalendarMonth,
-                        title = "Fecha y hora",
+                        title = stringResource(R.string.fecha_y_hora),
                         value = "${r.reservationDay} - ${r.reservationHour} hs"
                     )
 
                     DetailRow(
                         icon = Icons.Default.Person,
-                        title = "Creador",
+                        title = stringResource(R.string.creador),
                         value = "${r.reservationCreatorName} · Tel: ${r.reservationCreatorPhone}"
                     )
                 }
@@ -242,7 +262,7 @@ fun ReservationDetailScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "Participantes",
+                text = stringResource(R.string.participantes),
                 style = MaterialTheme.typography.titleLarge
             )
 
@@ -250,7 +270,7 @@ fun ReservationDetailScreen(
 
             if (participants.isEmpty()) {
                 Text(
-                    text = "Todavía no hay participantes invitados.",
+                    text = stringResource(R.string.todavia_no_hay_participantes_invitados),
                     color = Color.Gray
                 )
             } else {
@@ -311,7 +331,7 @@ fun ReservationDetailScreen(
                     contentDescription = null
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Invitar contactos")
+                Text(stringResource(R.string.invitar_contactos))
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -334,8 +354,8 @@ fun ReservationDetailScreen(
                                     .collection("notifications")
                                     .add(
                                         hashMapOf(
-                                            "title" to "Reserva cancelada",
-                                            "message" to "La reserva de ${r.placeFieldType} en ${r.placeName} se ha cancelado.",
+                                            "title" to titleCancelled,
+                                            "message" to messageCancelled,
                                             "reservationId" to r.id,
                                             "relatedUsers" to relatedUsers,
                                             "createdAt" to FieldValue.serverTimestamp()
@@ -348,8 +368,7 @@ fun ReservationDetailScreen(
                                     .document(reservationId)
                                     .delete()
                                     .await()
-
-                                onReservationCancelled("Reserva eliminada correctamente")
+                                onReservationCancelled(reservationDeletedSuccessfully)
                             } else {
                                 val uid = FirebaseAuth.getInstance().currentUser?.uid
 
@@ -368,7 +387,7 @@ fun ReservationDetailScreen(
                                     )
                                     .await()
 
-                                onReservationCancelled("Baja ejecutada correctamente")
+                                onReservationCancelled(leaveSuccessfully)
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -386,7 +405,7 @@ fun ReservationDetailScreen(
                     contentColor = Color.White
                 )
             ) {
-                val deleteTextBtn = if (isCreator) "Cancelar reserva" else "Darse de baja"
+                val deleteTextBtn = if (isCreator) cancelReservationText else unsubscribeText
 
                 if (isCancelling) {
                     CircularProgressIndicator(

@@ -1,43 +1,34 @@
 package com.catedra.feruturnos.ui.enclosure
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.firestore
-import kotlinx.coroutines.tasks.await
-import com.catedra.feruturnos.ui.search.FieldItem
-import com.catedra.feruturnos.ui.search.EnclosureItem
-import org.osmdroid.util.GeoPoint
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.AssistChip
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.text.style.TextAlign
+import androidx.core.content.ContextCompat
+import com.catedra.feruturnos.R
 import com.catedra.feruturnos.ui.reservation.ReservationRepository
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.rememberCoroutineScope
+import com.catedra.feruturnos.ui.search.EnclosureItem
+import com.catedra.feruturnos.ui.search.FieldItem
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import org.osmdroid.util.GeoPoint
 
 @Composable
 fun EnclosureDetailScreen(
@@ -54,6 +45,7 @@ fun EnclosureDetailScreen(
             isLoading = false
             return@LaunchedEffect
         }
+
         try {
             val doc = Firebase.firestore
                 .collection("enclosures")
@@ -64,20 +56,16 @@ fun EnclosureDetailScreen(
             val location = doc.getGeoPoint("location")
 
             if (location != null) {
-
                 val fields =
                     (doc.get("fields") as? List<Map<String, Any>>)
                         ?.map { field ->
-
                             FieldItem(
                                 id = (field["id"] as? Long)?.toInt() ?: 0,
                                 fieldName = field["fieldName"] as? String ?: "",
                                 type = field["type"] as? String ?: "",
                                 price = field["price"] as? Long ?: 0,
-                                days = field["days"] as? List<String>
-                                    ?: emptyList(),
-                                timeTable = field["timeTable"] as? List<String>
-                                    ?: emptyList(),
+                                days = field["days"] as? List<String> ?: emptyList(),
+                                timeTable = field["timeTable"] as? List<String> ?: emptyList(),
                                 description = field["description"] as? String ?: ""
                             )
                         }
@@ -88,8 +76,7 @@ fun EnclosureDetailScreen(
                     name = doc.getString("name") ?: "",
                     address = doc.getString("address") ?: "",
                     phone = doc.getLong("phone") ?: 0,
-                    amenities = doc.get("amenities") as? List<String>
-                        ?: emptyList(),
+                    amenities = doc.get("amenities") as? List<String> ?: emptyList(),
                     fields = fields,
                     location = GeoPoint(
                         location.latitude,
@@ -118,7 +105,7 @@ fun EnclosureDetailScreen(
 
         enclosure == null -> {
             Text(
-                text = "No se encontró el predio",
+                text = stringResource(R.string.no_se_encontro_el_predio),
                 modifier = Modifier.padding(24.dp)
             )
         }
@@ -131,6 +118,7 @@ fun EnclosureDetailScreen(
         }
     }
 }
+
 @Composable
 fun EnclosureDetailContent(
     enclosure: EnclosureItem,
@@ -141,73 +129,94 @@ fun EnclosureDetailContent(
     val snackbarHostState = remember { SnackbarHostState() }
 
     var selectedField by remember { mutableStateOf(enclosure.fields.firstOrNull()) }
-    var selectedDay   by remember { mutableStateOf<String?>(null) }
-    var selectedHour  by remember { mutableStateOf<String?>(null) }
+    var selectedDay by remember { mutableStateOf<String?>(null) }
+    var selectedHour by remember { mutableStateOf<String?>(null) }
 
     var showConfirmDialog by remember { mutableStateOf(false) }
-    var isLoading         by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
 
     val isPreview = LocalInspectionMode.current
     val auth = remember { if (isPreview) null else FirebaseAuth.getInstance() }
-    var reservationName by remember { mutableStateOf("Reserva de: ...") }
     val context = androidx.compose.ui.platform.LocalContext.current
+
+    val userFallbackText = stringResource(R.string.usuario)
+    val reservationOfText = stringResource(R.string.reserva_de)
+    val reservationCreatedText = stringResource(R.string.reserva_creada_correctamente)
+    val createReservationErrorText = stringResource(R.string.error_crear_reserva)
+    val errorText = stringResource(R.string.error, createReservationErrorText)
+
+    var reservationName by remember {
+        mutableStateOf("$reservationOfText: ...")
+    }
+    val errorTemplate = stringResource(R.string.error)
 
     LaunchedEffect(Unit) {
         val uid = auth?.currentUser?.uid
         android.util.Log.d("ENCLOSURE_DEBUG", "uid en composable: $uid")
+
         if (uid == null) return@LaunchedEffect
+
         try {
             val userQuery = Firebase.firestore
                 .collection("users")
                 .whereEqualTo("uid", uid)
                 .get()
                 .await()
+
             android.util.Log.d("ENCLOSURE_DEBUG", "docs encontrados: ${userQuery.documents.size}")
-            android.util.Log.d("ENCLOSURE_DEBUG", "name: ${userQuery.documents.firstOrNull()?.getString("name")}")
-            val name = userQuery.documents.firstOrNull()?.getString("name") ?: "usuario"
-            reservationName = "Reserva de: $name"
+            android.util.Log.d(
+                "ENCLOSURE_DEBUG",
+                "name: ${userQuery.documents.firstOrNull()?.getString("name")}"
+            )
+
+            val name = userQuery.documents.firstOrNull()?.getString("name")
+                ?: userFallbackText
+
+            reservationName = "$reservationOfText: $name"
         } catch (e: Exception) {
             android.util.Log.e("ENCLOSURE_DEBUG", "error: ${e.message}")
-            reservationName = "Reserva de: usuario"
+            reservationName = "$reservationOfText: $userFallbackText"
         }
     }
 
-    LaunchedEffect(Unit) {
-        val uid = auth?.currentUser?.uid
-        android.util.Log.d("ENCLOSURE_DEBUG", "uid en composable: $uid")
-        if (uid == null) return@LaunchedEffect
-        try {
-            // Traé TODOS los docs de users y buscá a mano
-            val allUsers = Firebase.firestore
-                .collection("users")
-                .get()
-                .await()
-            android.util.Log.d("ENCLOSURE_DEBUG", "total users: ${allUsers.documents.size}")
-            allUsers.documents.forEach { doc ->
-                android.util.Log.d("ENCLOSURE_DEBUG", "doc id: ${doc.id} | uid field: ${doc.getString("uid")} | name: ${doc.getString("name")}")
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("ENCLOSURE_DEBUG", "error: ${e.message}")
-        }
-    }
-
-
-    // Dialog de confirmación
     if (showConfirmDialog && selectedField != null && selectedDay != null && selectedHour != null) {
         AlertDialog(
-            onDismissRequest = { if (!isLoading) showConfirmDialog = false },
-            title = { Text("Confirmar reserva") },
+            onDismissRequest = {
+                if (!isLoading) showConfirmDialog = false
+            },
+            title = {
+                Text(stringResource(R.string.confirmar_reserva))
+            },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    SummaryRow("Cancha",  "${selectedField!!.fieldName} — ${selectedField!!.type}")
-                    SummaryRow("Día",     selectedDay!!.replaceFirstChar { it.uppercase() })
-                    SummaryRow("Horario", "$selectedHour:00 hs")
-                    SummaryRow("Total",   "$${selectedField!!.price}")
+                    SummaryRow(
+                        label = stringResource(R.string.cancha),
+                        value = "${selectedField!!.fieldName} — ${selectedField!!.type}"
+                    )
+
+                    SummaryRow(
+                        label = stringResource(R.string.dia),
+                        value = selectedDay!!.replaceFirstChar { it.uppercase() }
+                    )
+
+                    SummaryRow(
+                        label = stringResource(R.string.horario),
+                        value = "$selectedHour:00 hs"
+                    )
+
+                    SummaryRow(
+                        label = stringResource(R.string.total),
+                        value = "$${selectedField!!.price}"
+                    )
+
                     HorizontalDivider()
+
                     OutlinedTextField(
                         value = reservationName,
                         onValueChange = { reservationName = it },
-                        label = { Text("Nombre de la reserva") },
+                        label = {
+                            Text(stringResource(R.string.nombre_reserva))
+                        },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -219,21 +228,31 @@ fun EnclosureDetailContent(
                     onClick = {
                         scope.launch {
                             isLoading = true
+
                             try {
                                 val id = repository.createReservation(
-                                    enclosure       = enclosure,
-                                    field           = selectedField!!,
-                                    selectedDay     = selectedDay!!,
-                                    selectedHour    = selectedHour!!,
+                                    context = context,
+                                    enclosure = enclosure,
+                                    field = selectedField!!,
+                                    selectedDay = selectedDay!!,
+                                    selectedHour = selectedHour!!,
                                     reservationName = reservationName
                                 )
+
                                 mostrarNotificacionReservaCreada(context, id)
+
                                 showConfirmDialog = false
-                                snackbarHostState.showSnackbar("¡Reserva creada correctamente!")
+
+                                snackbarHostState.showSnackbar(
+                                    reservationCreatedText
+                                )
+
                                 onReservationCreated(id)
                             } catch (e: Exception) {
                                 snackbarHostState.showSnackbar(
-                                    "Error: ${e.message ?: "No se pudo crear la reserva"}"
+                                    e.message?.let { message ->
+                                        errorTemplate.format(message)
+                                    } ?: errorText
                                 )
                             } finally {
                                 isLoading = false
@@ -248,7 +267,7 @@ fun EnclosureDetailContent(
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
-                        Text("Confirmar")
+                        Text(stringResource(R.string.confirmar))
                     }
                 }
             },
@@ -257,14 +276,13 @@ fun EnclosureDetailContent(
                     enabled = !isLoading,
                     onClick = { showConfirmDialog = false }
                 ) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.cancelar))
                 }
             }
         )
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -272,7 +290,6 @@ fun EnclosureDetailContent(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // ── Header card ──────────────────────────────────────
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(2.dp)
@@ -288,6 +305,7 @@ fun EnclosureDetailContent(
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.weight(1f)
                         )
+
                         SuggestionChip(
                             onClick = {},
                             label = {
@@ -298,33 +316,46 @@ fun EnclosureDetailContent(
                             }
                         )
                     }
+
                     Spacer(modifier = Modifier.height(6.dp))
+
                     Text(
                         text = "📍 ${enclosure.address}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+
                     if (enclosure.amenities.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(12.dp))
                         HorizontalDivider()
                         Spacer(modifier = Modifier.height(12.dp))
+
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             enclosure.amenities.forEach { amenity ->
-                                AssistChip(onClick = {}, enabled = false, label = { Text(amenity) })
+                                AssistChip(
+                                    onClick = {},
+                                    enabled = false,
+                                    label = {
+                                        Text(amenity)
+                                    }
+                                )
                             }
                         }
                     }
                 }
             }
 
-            // ── Selección de cancha ──────────────────────────────
-            Text("Elegí una cancha", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = stringResource(R.string.elegi_una_cancha),
+                style = MaterialTheme.typography.titleMedium
+            )
 
             val fieldCardHeight = 90.dp
             val gridRows = Math.ceil(enclosure.fields.size / 2.0).toInt()
+
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier
@@ -336,36 +367,53 @@ fun EnclosureDetailContent(
             ) {
                 items(enclosure.fields) { field ->
                     val isSelected = selectedField?.id == field.id
+
                     Card(
                         onClick = {
                             selectedField = field
-                            selectedDay   = null
-                            selectedHour  = null
+                            selectedDay = null
+                            selectedHour = null
                         },
-                        modifier = Modifier.fillMaxWidth().height(fieldCardHeight),
-                        border = if (isSelected) CardDefaults.outlinedCardBorder().copy(width = 2.dp) else null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(fieldCardHeight),
+                        border = if (isSelected) {
+                            CardDefaults.outlinedCardBorder().copy(width = 2.dp)
+                        } else {
+                            null
+                        },
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isSelected)
+                            containerColor = if (isSelected) {
                                 MaterialTheme.colorScheme.primaryContainer
-                            else
+                            } else {
                                 MaterialTheme.colorScheme.surface
+                            }
                         ),
-                        elevation = CardDefaults.cardElevation(if (isSelected) 0.dp else 2.dp)
+                        elevation = CardDefaults.cardElevation(
+                            if (isSelected) 0.dp else 2.dp
+                        )
                     ) {
                         Column(
-                            modifier = Modifier.fillMaxSize().padding(12.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(12.dp),
                             verticalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column {
-                                Text(field.fieldName, style = MaterialTheme.typography.labelLarge)
                                 Text(
-                                    field.type,
+                                    text = field.fieldName,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+
+                                Text(
+                                    text = field.type,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
+
                             Text(
-                                "$${field.price}",
+                                text = "$${field.price}",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -374,9 +422,12 @@ fun EnclosureDetailContent(
                 }
             }
 
-            // ── Días, horarios y resumen ─────────────────────────
             selectedField?.let { field ->
-                Text("Día", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = stringResource(R.string.dia),
+                    style = MaterialTheme.typography.titleMedium
+                )
+
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -385,10 +436,10 @@ fun EnclosureDetailContent(
                     field.days.forEach { day ->
                         FilterChip(
                             selected = selectedDay == day,
-                            onClick  = { selectedDay = day },
-                            label    = {
+                            onClick = { selectedDay = day },
+                            label = {
                                 Text(
-                                    day.replaceFirstChar { it.uppercase() },
+                                    text = day.replaceFirstChar { it.uppercase() },
                                     textAlign = TextAlign.Center,
                                     maxLines = 1
                                 )
@@ -397,7 +448,11 @@ fun EnclosureDetailContent(
                     }
                 }
 
-                Text("Horario", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = stringResource(R.string.horario),
+                    style = MaterialTheme.typography.titleMedium
+                )
+
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -406,10 +461,10 @@ fun EnclosureDetailContent(
                     field.timeTable.forEach { hour ->
                         FilterChip(
                             selected = selectedHour == hour,
-                            onClick  = { selectedHour = hour },
-                            label    = {
+                            onClick = { selectedHour = hour },
+                            label = {
                                 Text(
-                                    "$hour:00",
+                                    text = "$hour:00",
                                     textAlign = TextAlign.Center,
                                     maxLines = 1
                                 )
@@ -424,36 +479,48 @@ fun EnclosureDetailContent(
                         elevation = CardDefaults.cardElevation(2.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Resumen de reserva", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                text = stringResource(R.string.resumen_reserva),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+
                             Spacer(modifier = Modifier.height(12.dp))
-                            SummaryRow("Cancha",  "${field.fieldName} — ${field.type}")
+
+                            SummaryRow(
+                                label = stringResource(R.string.cancha),
+                                value = "${field.fieldName} — ${field.type}"
+                            )
+
                             HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
-                            SummaryRow("Día",     selectedDay!!.replaceFirstChar { it.uppercase() })
+
+                            SummaryRow(
+                                label = stringResource(R.string.dia),
+                                value = selectedDay!!.replaceFirstChar { it.uppercase() }
+                            )
+
                             HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
-                            SummaryRow("Horario", "$selectedHour:00 hs")
+
+                            SummaryRow(
+                                label = stringResource(R.string.horario),
+                                value = "$selectedHour:00 hs"
+                            )
+
                             Spacer(modifier = Modifier.height(12.dp))
                             HorizontalDivider()
                             Spacer(modifier = Modifier.height(12.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("Total", style = MaterialTheme.typography.titleMedium)
-                                Text(
-                                    "$${field.price}",
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
+
+                            SummaryRow(
+                                label = stringResource(R.string.total),
+                                value = "$${field.price}"
+                            )
                         }
                     }
 
                     Button(
-                        onClick = { showConfirmDialog = true },  // ← abre el dialog
+                        onClick = { showConfirmDialog = true },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Confirmar reserva")
+                        Text(stringResource(R.string.confirmar_reserva))
                     }
                 }
             }
@@ -461,13 +528,16 @@ fun EnclosureDetailContent(
 
         SnackbarHost(
             hostState = snackbarHostState,
-            modifier  = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
 }
 
 @Composable
-private fun SummaryRow(label: String, value: String) {
+private fun SummaryRow(
+    label: String,
+    value: String
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -478,6 +548,7 @@ private fun SummaryRow(label: String, value: String) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium
@@ -491,10 +562,10 @@ private fun mostrarNotificacionReservaCreada(
 ) {
     val channelId = "feru_reservas"
 
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val channel = android.app.NotificationChannel(
             channelId,
-            "Reservas",
+            context.getString(R.string.reservas),
             android.app.NotificationManager.IMPORTANCE_HIGH
         )
 
@@ -502,8 +573,12 @@ private fun mostrarNotificacionReservaCreada(
         manager.createNotificationChannel(channel)
     }
 
-    val intent = android.content.Intent(context, com.catedra.feruturnos.MainActivity::class.java).apply {
-        flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+    val intent = android.content.Intent(
+        context,
+        com.catedra.feruturnos.MainActivity::class.java
+    ).apply {
+        flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
         putExtra("openNotifications", true)
     }
 
@@ -511,20 +586,30 @@ private fun mostrarNotificacionReservaCreada(
         context,
         reservationId.hashCode(),
         intent,
-        android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        android.app.PendingIntent.FLAG_UPDATE_CURRENT or
+                android.app.PendingIntent.FLAG_IMMUTABLE
     )
 
     val notification = androidx.core.app.NotificationCompat.Builder(context, channelId)
-        .setSmallIcon(com.catedra.feruturnos.R.drawable.logo_medium)
-        .setContentTitle("Reserva creada con éxito")
-        .setContentText("Tocá para ver tus notificaciones.")
+        .setSmallIcon(R.drawable.logo_medium)
+        .setContentTitle(context.getString(R.string.reserva_creada_con_exito))
+        .setContentText(context.getString(R.string.toca_para_ver_notificaciones))
         .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
         .setContentIntent(pendingIntent)
         .setAutoCancel(true)
         .build()
 
-    androidx.core.app.NotificationManagerCompat.from(context)
-        .notify(reservationId.hashCode(), notification)
+    val hasNotificationPermission =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+
+    if (hasNotificationPermission) {
+        androidx.core.app.NotificationManagerCompat.from(context)
+            .notify(reservationId.hashCode(), notification)
+    }
 }
 
 private val previewEnclosure = EnclosureItem(
@@ -578,4 +663,3 @@ fun EnclosureDetailContentPreview() {
         onReservationCreated = {}
     )
 }
-

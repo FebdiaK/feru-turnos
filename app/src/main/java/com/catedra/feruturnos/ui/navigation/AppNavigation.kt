@@ -79,7 +79,7 @@ import com.catedra.feruturnos.R
 import androidx.compose.material.icons.filled.Settings
 
 object Rutas {
-    const val HOME = stringResource(R.string.inicio)"Inicio"
+    const val HOME = "Inicio"
     const val SEARCH = "Búsqueda"
     const val PROFILE = "Perfil"
     const val SETTINGS = "Configuración"
@@ -89,9 +89,7 @@ object Rutas {
     const val ENCLOSURE_DETAIL = "enclosure/{enclosureId}"
     fun enclosureDetail(id: String) = "enclosure/$id"
     const val CONTACTS = "contacts/{source}/{reservationId}"
-
     fun contactsFromProfile() = "contacts/profile/none"
-
     fun contactsFromReservation(reservationId: String) =
         "contacts/reservation/$reservationId"
 }
@@ -171,7 +169,7 @@ fun AppNavigation(
                         ) {
                             Icon(
                                 Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Volver"
+                                contentDescription = stringResource(R.string.volver)
                             )
                         }
                     }
@@ -183,7 +181,7 @@ fun AppNavigation(
                             IconButton( onClick = { mostrarDialogoCerrarSesion = true} ) {
                                 Icon(
                                     Icons.Default.ExitToApp,
-                                    contentDescription = "Cerrar sesión"
+                                    contentDescription = stringResource(R.string.cerrar_sesion)
                                 )
                             }
 
@@ -194,7 +192,7 @@ fun AppNavigation(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Settings,
-                                    contentDescription = "Configuración",
+                                    contentDescription = stringResource(R.string.configuracion),
                                     tint = Color.White
                                 )
                             }
@@ -229,7 +227,7 @@ fun AppNavigation(
                                     Modifier
                                 },
                                 imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notificaciones",
+                                contentDescription = stringResource(R.string.notificaciones),
                                 tint = Color.White
                             )
                         }
@@ -247,7 +245,7 @@ fun AppNavigation(
 
                             AsyncImage(
                                 model = profileState.photo,
-                                contentDescription = "Perfil",
+                                contentDescription = stringResource(R.string.perfil),
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(24.dp)
@@ -258,7 +256,7 @@ fun AppNavigation(
 
                             Icon(
                                 imageVector = Icons.Default.AccountCircle,
-                                contentDescription = "Perfil",
+                                contentDescription = stringResource(R.string.perfil),
                                 tint = Color.White
                             )
                         }
@@ -280,7 +278,7 @@ fun AppNavigation(
                     icon = {
                         Icon(Icons.Default.Home, contentDescription = null)
                     },
-                    label = { Text("Inicio") },
+                    label = { Text(stringResource(R.string.inicio)) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = MaterialTheme.colorScheme.primary,
                         selectedTextColor = Color.White.copy(alpha = 0.75f),
@@ -300,7 +298,7 @@ fun AppNavigation(
                     icon = {
                         Icon(Icons.Default.Search, contentDescription = null)
                     },
-                    label = { Text("Buscar") },
+                    label = { Text(stringResource(R.string.buscar)) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = MaterialTheme.colorScheme.primary,
                         selectedTextColor = Color.White.copy(alpha = 0.75f),
@@ -320,7 +318,7 @@ fun AppNavigation(
                     icon = {
                         Icon(Icons.Default.Person, contentDescription = null)
                     },
-                    label = { Text("Perfil") },
+                    label = { Text(stringResource(R.string.perfil)) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = MaterialTheme.colorScheme.primary,
                         selectedTextColor = Color.White.copy(alpha = 0.75f),
@@ -351,7 +349,7 @@ fun AppNavigation(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "Cerrar sesión",
+                                text = stringResource(R.string.cerrar_sesion),
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.align(Alignment.Center)
                             )
@@ -362,13 +360,13 @@ fun AppNavigation(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
-                                    contentDescription = "Cancelar"
+                                    contentDescription = stringResource(R.string.cancelar)
                                 )
                             }
                         }
 
                         Text(
-                            text = "¿Seguro que querés cerrar sesión?",
+                            text = stringResource(R.string.seguro_que_queres_cerrar_sesion),
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                                 .padding(top = 16.dp, bottom = 24.dp)
@@ -381,7 +379,7 @@ fun AppNavigation(
                             },
                                     modifier = Modifier.align(Alignment.End)
                         ) {
-                            Text("Confirmar")
+                            Text(text = stringResource(R.string.confirmar))
                         }
                     }
                 }
@@ -477,13 +475,15 @@ fun AppNavigation(
                 val profileViewModel: ProfileViewModel = viewModel()
                 val profileState by profileViewModel.profileState.collectAsState()
 
+                val nuevaInvitacion = stringResource(R.string.nueva_invitacion)
+                val invitadoReserva = stringResource(R.string.fuiste_invitado_a_una_reserva)
+
                 ContactsScreen(
                     contacts = profileState.friends,
                     isInviting = source == "reservation",
                     onInviteClick = { selectedContacts ->
 
                         if (source == "reservation" && reservationId != "none") {
-
                             scope.launch {
                                 val participantIds = selectedContacts.map { it.uid }
 
@@ -507,8 +507,8 @@ fun AppNavigation(
                                     .collection("notifications")
                                     .add(
                                         hashMapOf(
-                                            "title" to "Nueva invitación",
-                                            "message" to "Fuiste invitado a una reserva.",
+                                            "title" to nuevaInvitacion,
+                                            "message" to invitadoReserva,
                                             "reservationId" to reservationId,
                                             "relatedUsers" to relatedUsers,
                                             "createdAt" to FieldValue.serverTimestamp()

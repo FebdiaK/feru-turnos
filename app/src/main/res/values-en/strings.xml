@@ -42,8 +42,51 @@
     <string name="predio_cercano">"Nearby property</string>
     <string name="tu_ubicacion">You are here</string>
     <string name="estas_aca">Your location</string>
+    <string name="cerrar_sesion">Log out</string>
+    <string name="cancelar">Cancel</string>
+    <string name="seguro_que_queres_cerrar_sesion">Are you sure you want to log out?</string>
+    <string name="confirmar">Confirm</string>
+    <string name="volver">Return</string>
+    <string name="nueva_invitacion">New invitation</string>
+    <string name="fuiste_invitado_a_una_reserva">You were invited to a reservation.</string>
 
+    <string name="no_se_encontro_la_reserva">Reservation not found</string>
+    <string name="reserva_cancelada">Reservation canceled</string>
+    <string name="mensaje_reserva_cancelada">Reservation for %1$s at %2$s has been canceled.</string>
+    <string name="cancha">Court</string>
+    <string name="precio_total">Total price</string>
+    <string name="fecha_y_hora">Date and time</string>
+    <string name="creador">Creator</string>
+    <string name="participantes">Participants</string>
+    <string name="todavia_no_hay_participantes_invitados">There are no invited participants yet.</string>
+    <string name="invitar_contactos">Invite contacts</string>
+    <string name="reserva_eliminada_correctamente">Reservation successfully deleted</string>
+    <string name="baja_ejecutada_correctamente">Cancellation successfully completed</string>
+    <string name="cancelar_reserva">Cancel reservation</string>
+    <string name="darse_de_baja">Cancel reservation</string>
+    <string name="no_hay_sesion_activa">There is no active session</string>
+    <string name="usuario">User</string>
+    <string name="reserva_creada_con_exito">Reservation created successfully</string>
+    <string name="mensaje_reserva_creada">Your reservation at %1$s for %2$s on %3$s at %4$s was created successfully.</string>
 
+    <string name="no_se_encontro_el_predio">Property not found</string>
+    <string name="nombre_de">Reservation of</string>
+    <string name="confirmar_reserva">Confirm reservation</string>
+    <string name="dia">Day</string>
+    <string name="horario">Schedule</string>
+    <string name="total">Total</string>
+    <string name="reserva_de">Reservation by</string>
+    <string name="nombre_reserva">Reservation name</string>
+
+    <string name="reserva_creada_correctamente">Reservation created successfully!</string>
+    <string name="error_crear_reserva">Could not create the reservation</string>
+    <string name="error">Error: %1$s</string>
+
+    <string name="elegi_una_cancha">Choose a field</string>
+    <string name="resumen_reserva">Reservation summary</string>
+
+    <string name="reservas">Reservations</string>
+    <string name="toca_para_ver_notificaciones">Tap to view your notifications.</string>
 
 
     <string name="inicio">Home</string>

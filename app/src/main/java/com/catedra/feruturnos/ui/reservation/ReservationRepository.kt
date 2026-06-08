@@ -1,4 +1,3 @@
-// ui/reservation/ReservationRepository.kt
 package com.catedra.feruturnos.ui.reservation
 
 import com.google.firebase.Timestamp
@@ -9,6 +8,8 @@ import com.google.firebase.firestore.firestore
 import com.catedra.feruturnos.ui.search.EnclosureItem
 import com.catedra.feruturnos.ui.search.FieldItem
 import kotlinx.coroutines.tasks.await
+import android.content.Context
+import com.catedra.feruturnos.R
 
 class ReservationRepository {
 
@@ -16,6 +17,7 @@ class ReservationRepository {
     private val auth by lazy { FirebaseAuth.getInstance() }
 
     suspend fun createReservation(
+        context: Context,
         enclosure: EnclosureItem,
         field: FieldItem,
         selectedDay: String,
@@ -23,7 +25,9 @@ class ReservationRepository {
         reservationName: String
     ): String {
         val user = auth.currentUser
-            ?: throw IllegalStateException("No hay sesión activa")
+            ?: throw IllegalStateException(
+                context.getString(R.string.no_hay_sesion_activa)
+            )
 
         val userQuery = db.collection("users")
             .whereEqualTo("uid", user.uid)
@@ -32,7 +36,8 @@ class ReservationRepository {
 
         val userDoc = userQuery.documents.firstOrNull()
 
-        val creatorName  = userDoc?.getString("name")    ?: "Usuario"
+        val creatorName = userDoc?.getString("name")
+            ?: context.getString(R.string.usuario)
         val creatorPhone = userDoc?.getLong("celphone")  ?: 0L
 
         val data = hashMapOf(
@@ -62,8 +67,14 @@ class ReservationRepository {
         db.collection("notifications")
             .add(
                 hashMapOf(
-                    "title" to "Reserva creada con éxito",
-                    "message" to "Tu reserva en ${enclosure.name} para ${field.type} el $selectedDay a las $selectedHour hs fue creada correctamente.",
+                    "title" to context.getString(R.string.reserva_creada_con_exito),
+                    "message" to context.getString(
+                        R.string.mensaje_reserva_creada,
+                        enclosure.name,
+                        field.type,
+                        selectedDay,
+                        selectedHour
+                    ),
                     "reservationId" to docRef.id,
                     "relatedUsers" to listOf(
                         hashMapOf(
