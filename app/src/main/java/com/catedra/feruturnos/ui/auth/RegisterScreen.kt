@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.catedra.feruturnos.R
 import android.graphics.Bitmap
-import androidx.core.content.FileProvider
+import androidx.compose.ui.res.stringResource
 import java.io.File
 import java.io.FileOutputStream
 
@@ -99,7 +99,7 @@ fun RegisterScreen(
         )
 
         Text(
-            text = "Crear cuenta",
+            text = stringResource(R.string.crear_cuenta),
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 24.dp)
         )
@@ -110,7 +110,7 @@ fun RegisterScreen(
                 name = it
                 ocultarError = true
             },
-            label = { Text("Ingrese su nombre completo") },
+            label = { Text(stringResource(R.string.ingrese_su_nombre_completo)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
@@ -134,7 +134,7 @@ fun RegisterScreen(
                 ocultarError = true
                 isRegistering = false
             },
-            label = { Text("Ingrese su email") },
+            label = { Text(stringResource(R.string.ingrese_su_email)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier
                 .fillMaxWidth()
@@ -148,7 +148,7 @@ fun RegisterScreen(
                 ocultarError = true
                 isRegistering = false
             },
-            label = { Text("Ingrese su contraseña") },
+            label = { Text(stringResource(R.string.ingrese_su_contrasena)) },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier
                 .fillMaxWidth()
@@ -162,7 +162,7 @@ fun RegisterScreen(
                 ocultarError = true
                 isRegistering = false
             },
-            label = { Text("Ingrese su celular") },
+            label = { Text(stringResource(R.string.ingrese_su_celular)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             isError = celphoneText.isNotBlank() && !celularValido,
             modifier = Modifier
@@ -194,7 +194,7 @@ fun RegisterScreen(
                 enabled = !isRegistering,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Cámara")
+                Text(stringResource(R.string.camara))
             }
 
             Button(
@@ -206,7 +206,7 @@ fun RegisterScreen(
                 enabled = !isRegistering,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Galería")
+                Text(stringResource(R.string.galeria))
             }
         }
 
@@ -249,7 +249,7 @@ fun RegisterScreen(
                     strokeWidth = 2.dp
                 )
             } else {
-                Text("Registrarme")
+                Text(stringResource(R.string.registrarme))
             }
         }
 

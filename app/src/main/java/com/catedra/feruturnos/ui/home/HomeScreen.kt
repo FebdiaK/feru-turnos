@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.res.stringResource
+import com.catedra.feruturnos.R
 
 @Composable
 fun HomeScreen(
@@ -66,7 +68,7 @@ fun HomeScreen(
     ) {
         item {
             CurrentReservationSection(
-                title = "Reservas actuales",
+                title = stringResource(R.string.reservas_actuales),
                 reservations = reservations,
                 onReservationClick = { reservation ->
                     onNavigateToReservationDetail(reservation.id)
@@ -76,15 +78,15 @@ fun HomeScreen(
 
         item {
             SearchBannerSection(
-                title = "¿Buscando dónde jugar?",
+                title = stringResource(R.string.buscando_donde_jugar),
                 onExploreClick = onNavigateToSearch
             )
         }
 
         item {
             ConnectPeopleSection(
-                title = "Conectar con personas",
-                btnText = "Buscar"
+                title = stringResource(R.string.conectar_con_personas),
+                btnText = stringResource(R.string.buscar)
             )
         }
     }

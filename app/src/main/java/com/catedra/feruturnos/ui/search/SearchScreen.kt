@@ -22,6 +22,8 @@ import kotlinx.coroutines.tasks.await
 import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.res.stringResource
+import com.catedra.feruturnos.R
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -107,7 +109,7 @@ fun SearchScreen(
                     EnclosureItem(
                         id = doc.id,
                         name = doc.getString("name")
-                            ?: "Predio sin nombre",
+                            ?: context.getString(R.string.predio_sin_nombre),
 
                         location = GeoPoint(
                             location.latitude,
@@ -299,7 +301,7 @@ fun RequestLocationPermissionBox(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Para ver los predios más cercanos necesitás habilitar el acceso a tu ubicación.",
+                text = stringResource(R.string.para_ver_los_predios_mas_cercanos_necesitas_habilitar_el_acceso_a_tu_ubicacion),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
@@ -310,7 +312,7 @@ fun RequestLocationPermissionBox(
             Button(
                 onClick = onRequestPermission
             ) {
-                Text("Habilitar ubicación")
+                Text(stringResource(R.string.habilitar_ubicacion))
             }
         }
     }
@@ -332,7 +334,7 @@ fun LoadingLocationBox() {
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Obteniendo tu ubicación...",
+                text = stringResource(R.string.obteniendo_tu_ubicacion),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )
@@ -361,7 +363,7 @@ fun SearchTextFieldCard(
             value = searchQuery,
             onValueChange = onSearchQueryChange,
             placeholder = {
-                Text("Buscar predio o deporte...")
+                Text(stringResource(R.string.buscar_predio_o_deporte))
             },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
@@ -388,9 +390,9 @@ fun SearchResultsSection(
     ) {
         Text(
             text = if (userLocation != null) {
-                "5 predios más cercanos a vos"
+                stringResource(R.string.predios_mas_cercanos_a_vos)
             } else {
-                "Predios disponibles"
+                stringResource(R.string.predios_disponibles)
             },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
@@ -417,7 +419,7 @@ fun SearchResultsSection(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No se encontraron predios")
+                    Text(stringResource(R.string.no_se_encontraron_predios))
                 }
             }
 

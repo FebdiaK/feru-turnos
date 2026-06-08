@@ -23,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.osmdroid.util.GeoPoint
+import androidx.compose.ui.res.stringResource
+import com.catedra.feruturnos.R
 
 @Composable
 fun EnclosureRowItem(
@@ -63,7 +65,10 @@ fun EnclosureRowItem(
                 )
 
                 Text(
-                    text = "A ${String.format("%.1f", distance)} km de tu ubicación",
+                    text = stringResource(
+                        R.string.a_x_km_de_tu_ubicacion,
+                        distance
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium
@@ -127,7 +132,10 @@ fun SelectedEnclosureCard(
                 )
 
                 Text(
-                    text = "A ${String.format("%.1f", distance)} km de tu ubicación",
+                    text = stringResource(
+                        R.string.a_x_km_de_tu_ubicacion,
+                        distance
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -137,14 +145,14 @@ fun SelectedEnclosureCard(
 
 
             Text(
-                text = "Servicios",
+                text = stringResource(R.string.servicios),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold
             )
 
             if (enclosure.amenities.isEmpty()) {
                 Text(
-                    text = "Sin servicios informados",
+                    text = stringResource(R.string.sin_servicios_informados),
                     style = MaterialTheme.typography.bodySmall
                 )
             } else {
@@ -159,7 +167,7 @@ fun SelectedEnclosureCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Canchas",
+                text = stringResource(R.string.canchas),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -188,7 +196,7 @@ fun SelectedEnclosureCard(
                 onClick = onReserve,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Ir a reservar")
+                Text(stringResource(R.string.ir_a_reservar))
             }
         }
     }

@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.size
@@ -22,6 +21,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.border
+import androidx.compose.ui.res.stringResource
+import com.catedra.feruturnos.R
 
 @Composable
 fun ProfileContent(
@@ -79,10 +80,10 @@ fun ProfileContent(
         Text(profileState.email)
         Text("${profileState.celphone}")
 
-        if (profileState.stars.isNotEmpty()) {
+        /**if (profileState.stars.isNotEmpty()) {
             val promedio = profileState.stars.average()
-            Text( text = "Puntuación ${String.format("%.1f", promedio)}★" )
-        }
+            Text( "Puntuación ${String.format("%.1f", promedio)}★" )
+        }*/
 
         Button(
             onClick = {
@@ -97,7 +98,7 @@ fun ProfileContent(
                 .fillMaxWidth()
                 .padding(top= 16.dp)
         ) {
-            Text("Contactos")
+            Text(stringResource(R.string.contactos))
         }
     }
 }

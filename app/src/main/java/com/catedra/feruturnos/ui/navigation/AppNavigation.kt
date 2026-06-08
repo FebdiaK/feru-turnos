@@ -79,7 +79,7 @@ import com.catedra.feruturnos.R
 import androidx.compose.material.icons.filled.Settings
 
 object Rutas {
-    const val HOME = "Inicio"
+    const val HOME = stringResource(R.string.inicio)"Inicio"
     const val SEARCH = "Búsqueda"
     const val PROFILE = "Perfil"
     const val SETTINGS = "Configuración"

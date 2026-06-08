@@ -11,8 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.catedra.feruturnos.R
 
 @Composable
 fun ContactsScreen(
@@ -32,7 +34,7 @@ fun ContactsScreen(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("No tenés contactos agregados")
+                Text(stringResource(R.string.no_tenes_contactos_agregados))
             }
             return
         }

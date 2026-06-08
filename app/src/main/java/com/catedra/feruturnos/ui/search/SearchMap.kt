@@ -13,7 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.catedra.feruturnos.R
 import com.utsman.osmandcompose.DefaultMapProperties
 import com.utsman.osmandcompose.Marker
 import com.utsman.osmandcompose.OpenStreetMap
@@ -71,7 +73,7 @@ fun SearchMap(
                 Marker(
                     state = markerState,
                     title = enclosure.name,
-                    snippet = "Predio cercano",
+                    snippet = stringResource(R.string.predio_cercano),
                     onClick = {
                         onSelectedEnclosureChange(enclosure)
                         true
@@ -80,8 +82,8 @@ fun SearchMap(
             }
             Marker(
                 state = currentUserMarkerState,
-                title = "Tu ubicación",
-                snippet = "Estás acá",
+                title = stringResource(R.string.tu_ubicacion),
+                snippet = stringResource(R.string.estas_aca),
                 icon = userIconDrawable,
                 onClick = { true }
             )
@@ -107,7 +109,7 @@ fun SearchMap(
                 )
 
                 Text(
-                    text = "Tu ubicación",
+                    text = stringResource(R.string.tu_ubicacion),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )

@@ -57,7 +57,7 @@ fun AuthScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Ingrese su email") },
+            label = { Text(stringResource(R.string.ingrese_su_email)) },
             keyboardOptions = KeyboardOptions(keyboardType =
                 KeyboardType.Email),
             modifier = Modifier
@@ -67,7 +67,7 @@ fun AuthScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Ingrese su contrasena") },
+            label = { Text(stringResource(R.string.ingrese_su_contrasena)) },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier
                 .fillMaxWidth()
@@ -82,7 +82,7 @@ fun AuthScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
-        ) { Text("Ingresar a mi cuenta") }
+        ) { Text(stringResource(R.string.ingresar_a_mi_cuenta)) }
         Button(
             onClick = onIrARegistro,
             enabled = true,
@@ -91,7 +91,7 @@ fun AuthScreen(
                 containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = Color.White,
             )
-        ) { Text("Registrarse") }
+        ) { Text(stringResource(R.string.registrarme)) }
         if (authState is AuthState.Error) {
             Text(
                 text = authState.mensaje,

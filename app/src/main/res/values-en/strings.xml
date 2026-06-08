@@ -2,8 +2,51 @@
     <string name="nombre_app">Feru Turnos</string>
 
     <string name="iniciar_sesion">Login</string>
+    <string name="ingrese_su_email">Enter your email</string>
+    <string name="ingrese_su_contrasena">Enter your password</string>
+    <string name="ingresar_a_mi_cuenta">Log in to my account</string>
+    <string name="registrarme">Register</string>
+    <string name="crear_cuenta">Create account</string>
+    <string name="ingrese_su_nombre_completo">Enter your full name</string>
+    <string name="ingrese_su_celular">Enter your cellphone number</string>
+    <string name="camara">Camera</string>
+    <string name="galeria">Gallery</string>
+    <string name="foto_seleccionada">Selected photo</string>
+    <string name="debe_tener_al_menos_10_digitos">Must have at least 10 digits</string>
+    <string name="solo_se_permiten_letras">Only letters are allowed</string>
 
-    <string name="inicio">Init</string>
+    <string name="no_tenes_contactos_agregados">"You haven't contacts added"</string>
+
+    <string name="sin_reservas_actuales">No current reservations</string>
+    <string name="explora_las_canchas_mas_cercanas_y_reserva_tu_turno_al_instante">Explore the nearest courts and book your time instantly.</string>
+    <string name="buscar">Search</string>
+    <string name="ingrese_el_id_de_contacto">Enter the contact ID</string>
+    <string name="no_se_ha_encontrado_un_contacto_con_ese_id">No contact found with that ID</string>
+    <string name="reservas_actuales">Current Reservations</string>
+    <string name="buscando_donde_jugar">Looking for a place to play?</string>
+    <string name="conectar_con_personas">Connect with people</string>
+
+    <string name="predio_sin_nombre">Unnamed property</string>
+    <string name="para_ver_los_predios_mas_cercanos_necesitas_habilitar_el_acceso_a_tu_ubicacion">To see the nearest properties, you need to enable access to your location.</string>
+    <string name="habilitar_ubicacion">Enable location</string>
+    <string name="obteniendo_tu_ubicacion">Getting your location...</string>
+    <string name="buscar_predio_o_deporte">Search for property or sport...</string>
+    <string name="predios_mas_cercanos_a_vos">Properties closest to you</string>
+    <string name="predios_disponibles">Available properties</string>
+    <string name="no_se_encontraron_predios">No properties found</string>
+    <string name="a_x_km_de_tu_ubicacion">%1$.1f km from your location</string>
+    <string name="servicios">Services</string>
+    <string name="sin_servicios_informados">No services reported</string>
+    <string name="canchas">Courts</string>
+    <string name="ir_a_reservar">Go to reservation</string>
+    <string name="predio_cercano">"Nearby property</string>
+    <string name="tu_ubicacion">You are here</string>
+    <string name="estas_aca">Your location</string>
+
+
+
+
+    <string name="inicio">Home</string>
     <string name="busqueda">Search</string>
     <string name="predio">Place</string>
     <string name="perfil">Profile</string>

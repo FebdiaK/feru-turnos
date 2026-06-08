@@ -20,6 +20,8 @@ import com.google.firebase.firestore.firestore
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import com.catedra.feruturnos.R
 import com.catedra.feruturnos.ui.contacts.ContactUser
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -59,7 +61,7 @@ fun CurrentReservationSection(
             Spacer(modifier = Modifier.height(12.dp))
 
             if (reservations.isEmpty()) {
-                Text("Sin reservas actuales")
+                Text(stringResource(R.string.sin_reservas_actuales))
             } else {
                 reservations.forEach { reservation ->
                     ReservationsItem(
@@ -150,7 +152,7 @@ fun SearchBannerSection(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(text = "Explorá las canchas más cercanas y reservá tu turno al instante.")
+            Text(stringResource(R.string.explora_las_canchas_mas_cercanas_y_reserva_tu_turno_al_instante))
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -158,7 +160,7 @@ fun SearchBannerSection(
                 onClick = onExploreClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Buscar")
+                Text(stringResource(R.string.buscar))
             }
         }
     }
@@ -239,7 +241,7 @@ fun ConnectPeopleSection(
                     noEncontrado = false
                     usuarioEncontrado = null
                 },
-                label = { Text("Ingrese el id de contacto") },
+                label = { Text(stringResource(R.string.ingrese_el_id_de_contacto)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -378,7 +380,7 @@ fun ConnectPeopleSection(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "No se ha encontrado un contacto con ese ID",
+                    text = stringResource(R.string.no_se_ha_encontrado_un_contacto_con_ese_id),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium
                 )
