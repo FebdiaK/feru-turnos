@@ -13,7 +13,7 @@ data class EnclosureItem(
     )
 
 data class FieldItem(
-    val id: Int = 0,
+    val id: String = "",
     val fieldName: String = "",
     val type: String = "",
     val price: Long = 0,

@@ -43,8 +43,8 @@ class ReservationRepository {
         val data = hashMapOf(
             "createdAt"               to Timestamp.now(),
             "creatorId"               to user.uid,
-            "enclosuseId"             to enclosure.id,
-            "fieldId"                 to field.id.toString(),
+            "enclosureId"             to enclosure.id,
+            "fieldId"                 to field.id,
             "open"                    to false,
             "participantsId"          to listOf(user.uid),
             "placeAddress"            to enclosure.address,

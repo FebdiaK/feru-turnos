@@ -60,7 +60,7 @@ fun EnclosureDetailScreen(
                     (doc.get("fields") as? List<Map<String, Any>>)
                         ?.map { field ->
                             FieldItem(
-                                id = (field["id"] as? Long)?.toInt() ?: 0,
+                                id = field["id"] as? String ?: "",
                                 fieldName = field["fieldName"] as? String ?: "",
                                 type = field["type"] as? String ?: "",
                                 price = field["price"] as? Long ?: 0,
@@ -144,7 +144,7 @@ fun EnclosureDetailContent(
     val reservationCreatedText = stringResource(R.string.reserva_creada_correctamente)
     val createReservationErrorText = stringResource(R.string.error_crear_reserva)
     val errorText = stringResource(R.string.error, createReservationErrorText)
-
+    var reservedSlots by remember { mutableStateOf<Set<String>>(emptySet()) }
     var reservationName by remember {
         mutableStateOf("$reservationOfText: ...")
     }
@@ -176,6 +176,32 @@ fun EnclosureDetailContent(
         } catch (e: Exception) {
             android.util.Log.e("ENCLOSURE_DEBUG", "error: ${e.message}")
             reservationName = "$reservationOfText: $userFallbackText"
+        }
+    }
+
+    LaunchedEffect(enclosure.id) {
+        if (isPreview) return@LaunchedEffect
+
+        try {
+            val snapshot = Firebase.firestore
+                .collection("reservations")
+                .whereEqualTo("enclosureId", enclosure.id)
+                .get()
+                .await()
+
+            reservedSlots = snapshot.documents.mapNotNull { doc ->
+                val fieldId = doc.getString("fieldId") ?: return@mapNotNull null
+                val day = doc.getString("reservationDay") ?: return@mapNotNull null
+
+                val hour = doc.getString("reservationHour")
+                    ?: doc.getString("reservationTime")
+                    ?: return@mapNotNull null
+
+                "$fieldId|$day|$hour"
+            }.toSet()
+
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -459,12 +485,24 @@ fun EnclosureDetailContent(
                     verticalArrangement = Arrangement.spacedBy(0.5.dp)
                 ) {
                     field.timeTable.forEach { hour ->
+                        val slotKey = "${field.id}|$selectedDay|$hour"
+                        val isReserved = selectedDay != null && reservedSlots.contains(slotKey)
+
                         FilterChip(
                             selected = selectedHour == hour,
-                            onClick = { selectedHour = hour },
+                            enabled = !isReserved,
+                            onClick = {
+                                if (!isReserved) {
+                                    selectedHour = hour
+                                }
+                            },
                             label = {
                                 Text(
-                                    text = "$hour:00",
+                                    text = if (isReserved) {
+                                        "$hour:00 - Reservado"
+                                    } else {
+                                        "$hour:00"
+                                    },
                                     textAlign = TextAlign.Center,
                                     maxLines = 1
                                 )
@@ -628,7 +666,7 @@ private val previewEnclosure = EnclosureItem(
     ),
     fields = listOf(
         FieldItem(
-            id = 0,
+            id = "cancha_1",
             fieldName = "Cancha número 1",
             type = "Paddel",
             price = 5000,

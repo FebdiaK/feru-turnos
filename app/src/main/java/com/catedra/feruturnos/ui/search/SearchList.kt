@@ -218,7 +218,7 @@ private val previewEnclosure = EnclosureItem(
     ),
     fields = listOf(
         FieldItem(
-            id = 0,
+            id = "cancha_1",
             fieldName = "Cancha número 1",
             type = "paddel",
             price = 5000,

@@ -50,6 +50,8 @@ fun SearchScreen(
             com.catedra.feruturnos.R.drawable.ic_user_location
         )
     }
+    val enclosureWithoutNameText =
+        stringResource(R.string.predio_sin_nombre)
 
     LaunchedEffect(Unit) {
         Configuration.getInstance().apply {
@@ -87,7 +89,7 @@ fun SearchScreen(
                                     ?: return@mapNotNull null
 
                                 FieldItem(
-                                    id = (map["id"] as? Long)?.toInt() ?: 0,
+                                    id = map["id"] as? String ?: "",
                                     fieldName = map["fieldName"] as? String ?: "",
                                     type = map["type"] as? String ?: "",
                                     price = map["price"] as? Long ?: 0,
@@ -109,8 +111,7 @@ fun SearchScreen(
                     EnclosureItem(
                         id = doc.id,
                         name = doc.getString("name")
-                            ?: context.getString(R.string.predio_sin_nombre),
-
+                            ?: enclosureWithoutNameText,
                         location = GeoPoint(
                             location.latitude,
                             location.longitude
