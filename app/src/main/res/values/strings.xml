@@ -94,6 +94,8 @@
 
     <string name="logo">Logo</string>
     <string name="sin_telefono">Sin teléfono</string>
+    <string name="seguro_que_queres_cancelar_reserva">¿Seguro que querés cancelar la reserva?</string>
+    <string name="seguro_que_queres_darte_de_baja">¿Seguro que querés darte de baja de esta reserva?</string>
 
     <string name="inicio">Inicio</string>
     <string name="busqueda">Búsqueda</string>
