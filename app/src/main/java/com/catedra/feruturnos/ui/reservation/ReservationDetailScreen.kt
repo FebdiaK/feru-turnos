@@ -133,6 +133,7 @@ fun ReservationDetailScreen(
 
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
     val isCreator = currentUserId == r.creatorId
+    val isCurrentUserParticipant = r.participantsId.contains(currentUserId)
 
     val mapPoint = r.placeLocation?.let {
         GeoPoint(it.latitude, it.longitude)
@@ -168,130 +169,112 @@ fun ReservationDetailScreen(
         }
 
     if (mostrarDialogoCancelarReserva) {
-        Dialog(
+        AlertDialog(
             onDismissRequest = {
                 if (!isCancelling) mostrarDialogoCancelarReserva = false
-            }
-        ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 0.dp),
-                shape = RoundedCornerShape(0.dp),
-                color = Color.White
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
+            },
+            shape = RoundedCornerShape(28.dp),
+            title = {
+                Text(
+                    text = tituloDialogoCancelar,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            },
+            text = {
+                Text(
+                    text = mensajeDialogoCancelar,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { mostrarDialogoCancelarReserva = false },
+                    enabled = !isCancelling
                 ) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = tituloDialogoCancelar,
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
+                    Text(stringResource(R.string.cancelar))
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            try {
+                                isCancelling = true
 
-                        IconButton(
-                            onClick = {
-                                if (!isCancelling) {
-                                    mostrarDialogoCancelarReserva = false
-                                }
-                            },
-                            modifier = Modifier.align(Alignment.CenterEnd)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = stringResource(R.string.cancelar)
-                            )
-                        }
-                    }
-
-                    Text(
-                        text = mensajeDialogoCancelar,
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(top = 16.dp, bottom = 24.dp)
-                    )
-
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                try {
-                                    isCancelling = true
-
-                                    if (isCreator) {
-                                        val relatedUsers = r.participantsId.map { participantId ->
-                                            mapOf(
-                                                "userId" to participantId,
-                                                "read" to false
-                                            )
-                                        }
-
-                                        Firebase.firestore
-                                            .collection("notifications")
-                                            .add(
-                                                hashMapOf(
-                                                    "title" to titleCancelled,
-                                                    "message" to messageCancelled,
-                                                    "reservationId" to r.id,
-                                                    "relatedUsers" to relatedUsers,
-                                                    "createdAt" to FieldValue.serverTimestamp()
-                                                )
-                                            )
-                                            .await()
-
-                                        Firebase.firestore
-                                            .collection("reservations")
-                                            .document(reservationId)
-                                            .delete()
-                                            .await()
-
-                                        mostrarDialogoCancelarReserva = false
-                                        onReservationCancelled(reservationDeletedSuccessfully)
-                                    } else {
-                                        val uid = FirebaseAuth.getInstance().currentUser?.uid
-
-                                        if (uid == null) {
-                                            isCancelling = false
-                                            return@launch
-                                        }
-
-                                        Firebase.firestore
-                                            .collection("reservations")
-                                            .document(reservationId)
-                                            .update(
-                                                mapOf(
-                                                    "participantsId" to FieldValue.arrayRemove(uid)
-                                                )
-                                            )
-                                            .await()
-
-                                        mostrarDialogoCancelarReserva = false
-                                        onReservationCancelled(leaveSuccessfully)
+                                if (isCreator) {
+                                    val relatedUsers = r.participantsId.map { participantId ->
+                                        mapOf(
+                                            "userId" to participantId,
+                                            "read" to false
+                                        )
                                     }
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                    isCancelling = false
+
+                                    Firebase.firestore
+                                        .collection("notifications")
+                                        .add(
+                                            hashMapOf(
+                                                "title" to titleCancelled,
+                                                "message" to messageCancelled,
+                                                "reservationId" to r.id,
+                                                "relatedUsers" to relatedUsers,
+                                                "createdAt" to FieldValue.serverTimestamp()
+                                            )
+                                        )
+                                        .await()
+
+                                    Firebase.firestore
+                                        .collection("reservations")
+                                        .document(reservationId)
+                                        .delete()
+                                        .await()
+
+                                    mostrarDialogoCancelarReserva = false
+                                    onReservationCancelled(reservationDeletedSuccessfully)
+                                } else {
+                                    val uid = FirebaseAuth.getInstance().currentUser?.uid
+
+                                    if (uid == null) {
+                                        isCancelling = false
+                                        return@launch
+                                    }
+
+                                    Firebase.firestore
+                                        .collection("reservations")
+                                        .document(reservationId)
+                                        .update(
+                                            mapOf(
+                                                "participantsId" to FieldValue.arrayRemove(uid)
+                                            )
+                                        )
+                                        .await()
+
+                                    mostrarDialogoCancelarReserva = false
+                                    onReservationCancelled(leaveSuccessfully)
                                 }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                isCancelling = false
                             }
-                        },
-                        enabled = !isCancelling,
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        if (isCancelling) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text(stringResource(R.string.confirmar))
                         }
+                    },
+                    enabled = !isCancelling,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isCreator) Color.Red else MaterialTheme.colorScheme.primary,
+                        contentColor = Color.White
+                    )
+                ) {
+                    if (isCancelling) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(stringResource(R.string.confirmar))
                     }
                 }
             }
-        }
+        )
     }
 
     Column(
@@ -453,6 +436,7 @@ fun ReservationDetailScreen(
 
             Button(
                 onClick = { onNavigateToContacts(reservationId) },
+                enabled = isCreator || isCurrentUserParticipant,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -478,7 +462,7 @@ fun ReservationDetailScreen(
                 onClick = {
                     mostrarDialogoCancelarReserva = true
                 },
-                enabled = !isCancelling,
+                enabled = !isCancelling && (isCreator || isCurrentUserParticipant),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
