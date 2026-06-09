@@ -102,8 +102,10 @@
     <string name="contactos">Contacts</string>
     <string name="notificaciones">Notifications</string>
     <string name="reserva">Reserve</string>
+    <string name="selecciona_un_contacto">Select a contact</string>
 
     <string name="language">Language</string>
     <string name="spanish">Spanish</string>
     <string name="english">English</string>
+    <string name="portugues">Português</string>
 </resources>

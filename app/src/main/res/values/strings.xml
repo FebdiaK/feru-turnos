@@ -104,9 +104,11 @@
     <string name="configuracion">Configuración</string>
     <string name="contactos">Contactos</string>
     <string name="notificaciones">Notificaciones</string>
-    <string name="reserva">Notificaciones</string>
+    <string name="reserva">Reserva</string>
+    <string name="selecciona_un_contacto">Seleccioná un contacto</string>
 
     <string name="language">Idioma</string>
     <string name="spanish">Español</string>
     <string name="english">Inglés</string>
+    <string name="portugues">Português</string>
 </resources>
