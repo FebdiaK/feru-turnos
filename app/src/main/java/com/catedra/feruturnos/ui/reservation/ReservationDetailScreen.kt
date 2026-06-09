@@ -259,7 +259,7 @@ fun ReservationDetailScreen(
                     },
                     enabled = !isCancelling,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isCreator) Color.Red else MaterialTheme.colorScheme.primary,
+                        containerColor = Color.Red,
                         contentColor = Color.White
                     )
                 ) {

@@ -77,6 +77,8 @@ import androidx.compose.ui.res.stringResource
 import com.catedra.feruturnos.ui.settings.SettingsScreen
 import com.catedra.feruturnos.R
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 
 object Rutas {
     const val HOME = "Inicio"
@@ -332,58 +334,39 @@ fun AppNavigation(
     ) { padding ->
 
         if (mostrarDialogoCerrarSesion) {
-            Dialog(
-                onDismissRequest = { mostrarDialogoCerrarSesion = false }
-            ) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 0.dp),
-                    shape = RoundedCornerShape(0.dp),
-                    color = Color.White
-                ) {
-                    Column (
-                        modifier = Modifier.padding(16.dp)
+            AlertDialog(
+                onDismissRequest = { mostrarDialogoCerrarSesion = false },
+                shape = RoundedCornerShape(28.dp),
+                title = {
+                    Text(
+                        text = stringResource(R.string.cerrar_sesion),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
+                text = {
+                    Text(
+                        text = stringResource(R.string.seguro_que_queres_cerrar_sesion),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { mostrarDialogoCerrarSesion = false }
                     ) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = stringResource(R.string.cerrar_sesion),
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-
-                            IconButton(
-                                onClick = { mostrarDialogoCerrarSesion = false },
-                                modifier = Modifier.align(Alignment.CenterEnd)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = stringResource(R.string.cancelar)
-                                )
-                            }
+                        Text(stringResource(R.string.cancelar))
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            mostrarDialogoCerrarSesion = false
+                            onCerrarSesion()
                         }
-
-                        Text(
-                            text = stringResource(R.string.seguro_que_queres_cerrar_sesion),
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .padding(top = 16.dp, bottom = 24.dp)
-                        )
-
-                        Button (
-                            onClick = {
-                                mostrarDialogoCerrarSesion = false
-                                onCerrarSesion()
-                            },
-                                    modifier = Modifier.align(Alignment.End)
-                        ) {
-                            Text(text = stringResource(R.string.confirmar))
-                        }
+                    ) {
+                        Text(text = stringResource(R.string.confirmar))
                     }
                 }
-            }
+            )
         }
 
         NavHost(
