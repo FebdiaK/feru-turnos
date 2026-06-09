@@ -26,6 +26,7 @@ import com.catedra.feruturnos.ui.contacts.ContactUser
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.launch
 
 @Composable
 fun CurrentReservationSection(
@@ -179,8 +180,11 @@ fun ConnectPeopleSection(
     var isLoading by remember { mutableStateOf(false) }
     val db = Firebase.firestore
     var noEncontrado by remember { mutableStateOf(false) }
-
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val currentUid = FirebaseAuth.getInstance().currentUser?.uid
+    val contactoAgregadoText = stringResource(R.string.contacto_agregado_correctamente)
+    val contactoEliminadoText = stringResource(R.string.contacto_eliminado_correctamente)
 
     var friends by remember {
         mutableStateOf<List<ContactUser>>(emptyList())
@@ -207,7 +211,10 @@ fun ConnectPeopleSection(
         }
     }
 
-    Card(
+    Box(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)
@@ -220,174 +227,184 @@ fun ConnectPeopleSection(
         shape = RoundedCornerShape(0.dp)
     ) {
 
-        Column(
+            Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White)
                 .padding(16.dp)
         ) {
 
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Medium
-            )
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(
+                    value = contactId,
+                    onValueChange = {
+                        contactId = it
+                        noEncontrado = false
+                        usuarioEncontrado = null
+                    },
+                    label = { Text(stringResource(R.string.ingrese_el_id_de_contacto)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                val currentUid = FirebaseAuth.getInstance().currentUser?.uid
 
-            Spacer(modifier = Modifier.height(4.dp))
+                Button(
+                    onClick = {
 
-            OutlinedTextField(
-                value = contactId,
-                onValueChange = {
-                    contactId = it
-                    noEncontrado = false
-                    usuarioEncontrado = null
-                },
-                label = { Text(stringResource(R.string.ingrese_el_id_de_contacto)) },
-                modifier = Modifier.fillMaxWidth()
-            )
+                        isLoading = true
 
-            Spacer(modifier = Modifier.height(12.dp))
+                        db.collection("users")
+                            .whereEqualTo("contactId", contactId)
+                            .get()
+                            .addOnSuccessListener { result ->
 
-            val currentUid = FirebaseAuth
-                .getInstance()
-                .currentUser
-                ?.uid
-
-            Button(
-                onClick = {
-
-                    isLoading = true
-
-                    db.collection("users")
-                        .whereEqualTo("contactId", contactId)
-                        .get()
-                        .addOnSuccessListener { result ->
-
-                            val document = result.documents.firstOrNull {
-                                it.id != currentUid
-                            }
-
-                            usuarioEncontrado =
-                                if (document != null) {
-                                    noEncontrado = false
-
-                                    ContactUser(
-                                        uid = document.getString("uid") ?: document.id,
-                                        name = document.getString("name") ?: "",
-                                        contactId = document.getString("contactId") ?: "",
-                                        photo = document.getString("photo") ?: "",
-                                        celphone = document.getString("celphone") ?: ""
-                                    )
-                                } else {
-                                    noEncontrado = true
-                                    null
+                                val document = result.documents.firstOrNull {
+                                    it.id != currentUid
                                 }
 
-                            isLoading = false
-                        }
-                        .addOnFailureListener {
-                            noEncontrado = true
-                            usuarioEncontrado = null
-                            isLoading = false
-                        }
+                                usuarioEncontrado =
+                                    if (document != null) {
+                                        noEncontrado = false
 
-                },
-                enabled = contactId.length == 6,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text(btnText)
-                }
-            }
+                                        ContactUser(
+                                            uid = document.getString("uid") ?: document.id,
+                                            name = document.getString("name") ?: "",
+                                            contactId = document.getString("contactId") ?: "",
+                                            photo = document.getString("photo") ?: "",
+                                            celphone = document.getString("celphone") ?: ""
+                                        )
+                                    } else {
+                                        noEncontrado = true
+                                        null
+                                    }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                                isLoading = false
+                            }
+                            .addOnFailureListener {
+                                noEncontrado = true
+                                usuarioEncontrado = null
+                                isLoading = false
+                            }
 
-            usuarioEncontrado?.let { usuario ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    },
+                    enabled = contactId.length == 6,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(btnText)
+                    }
+                }
 
-                    AsyncImage(
-                        model = usuario.photo,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Column(
-                        modifier = Modifier.weight(1f)
+                usuarioEncontrado?.let { usuario ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
 
-                        Text(
-                            text = usuario.name,
-                            fontWeight = FontWeight.Bold
+                        AsyncImage(
+                            model = usuario.photo,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(56.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
                         )
 
-                        Text("#${usuario.contactId}")
-                    }
+                        Spacer(modifier = Modifier.width(16.dp))
 
-                    val yaEsAmigo = friends.any { it.uid == usuario.uid }
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
 
-                    Button(
-                        onClick = {
-                            currentUid?.let { uid ->
+                            Text(
+                                text = usuario.name,
+                                fontWeight = FontWeight.Bold
+                            )
 
-                                val friendData = mapOf(
-                                    "uid" to usuario.uid,
-                                    "name" to usuario.name,
-                                    "contactId" to usuario.contactId,
-                                    "photo" to usuario.photo,
-                                    "celphone" to usuario.celphone
-                                )
+                            Text("#${usuario.contactId}")
+                        }
 
-                                if (yaEsAmigo) {
-                                    db.collection("users")
-                                        .document(uid)
-                                        .update("friends", FieldValue.arrayRemove(friendData))
+                        val yaEsAmigo = friends.any { it.uid == usuario.uid }
 
-                                    friends = friends.filter { it.uid != usuario.uid }
-                                } else {
-                                    db.collection("users")
-                                        .document(uid)
-                                        .update("friends", FieldValue.arrayUnion(friendData))
+                        Button(
+                            onClick = {
+                                currentUid?.let { uid ->
 
-                                    friends = friends + usuario
+                                    val friendData = mapOf(
+                                        "uid" to usuario.uid,
+                                        "name" to usuario.name,
+                                        "contactId" to usuario.contactId,
+                                        "photo" to usuario.photo,
+                                        "celphone" to usuario.celphone
+                                    )
+
+                                    if (yaEsAmigo) {
+                                        db.collection("users")
+                                            .document(uid)
+                                            .update("friends", FieldValue.arrayRemove(friendData))
+                                            .addOnSuccessListener {
+                                                friends = friends.filter { it.uid != usuario.uid }
+
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar(contactoEliminadoText)
+                                                }
+                                            }
+                                    } else {
+                                        db.collection("users")
+                                            .document(uid)
+                                            .update("friends", FieldValue.arrayUnion(friendData))
+                                            .addOnSuccessListener {
+                                                friends = friends + usuario
+
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar(contactoAgregadoText)
+                                                }
+                                            }
+                                    }
                                 }
-                            }
-                        },
-                        modifier = Modifier.width(36.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (yaEsAmigo) Color.Red else Color.Green
-                        ),
-                        contentPadding = PaddingValues(0.dp)
-                    ) {
-                        Text(if (yaEsAmigo) "×" else "+")
+                            },
+                            modifier = Modifier.width(36.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (yaEsAmigo) Color.Red else Color.Green
+                            ),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text(if (yaEsAmigo) "×" else "+")
+                        }
                     }
                 }
-            }
-            if (noEncontrado) {
-                Spacer(modifier = Modifier.height(12.dp))
+                if (noEncontrado) {
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                Text(
-                    text = stringResource(R.string.no_se_ha_encontrado_un_contacto_con_ese_id),
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                    Text(
+                        text = stringResource(R.string.no_se_ha_encontrado_un_contacto_con_ese_id),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 8.dp)
+        )
     }
 }

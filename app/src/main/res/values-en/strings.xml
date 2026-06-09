@@ -104,6 +104,9 @@
     <string name="reserva">Reserve</string>
     <string name="selecciona_un_contacto">Select a contact</string>
 
+    <string name="contacto_agregado_correctamente">Contact added successfully</string>
+    <string name="contacto_eliminado_correctamente">Contact removed successfully</string>
+    <string name="error_al_actualizar_contacto">Could not update the contact</string>
     <string name="language">Language</string>
     <string name="spanish">Spanish</string>
     <string name="english">English</string>

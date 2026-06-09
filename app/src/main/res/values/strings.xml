@@ -97,6 +97,9 @@
     <string name="seguro_que_queres_cancelar_reserva">¿Seguro que querés cancelar la reserva?</string>
     <string name="seguro_que_queres_darte_de_baja">¿Seguro que querés darte de baja de esta reserva?</string>
 
+    <string name="contacto_agregado_correctamente">Contacto agregado correctamente</string>
+    <string name="contacto_eliminado_correctamente">Contacto eliminado correctamente</string>
+    <string name="error_al_actualizar_contacto">No se pudo actualizar el contacto</string>
     <string name="inicio">Inicio</string>
     <string name="busqueda">Búsqueda</string>
     <string name="predio">Predio</string>
