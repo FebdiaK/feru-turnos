@@ -80,6 +80,7 @@
     <string name="reserva_de">Reserva de</string>
 
     <string name="nombre_reserva">Nombre de la reserva</string>
+    <string name="invitar">Invitar</string>
 
     <string name="reserva_creada_correctamente">¡Reserva creada correctamente!</string>
     <string name="error_crear_reserva">No se pudo crear la reserva</string>
@@ -91,8 +92,8 @@
     <string name="reservas">Reservas</string>
     <string name="toca_para_ver_notificaciones">Tocá para ver tus notificaciones.</string>
 
-
-
+    <string name="logo">Logo</string>
+    <string name="sin_telefono">Sin teléfono</string>
 
     <string name="inicio">Inicio</string>
     <string name="busqueda">Búsqueda</string>

@@ -200,7 +200,8 @@ fun ConnectPeopleSection(
                     uid = it["uid"] as? String ?: "",
                     name = it["name"] as? String ?: "",
                     contactId = it["contactId"] as? String ?: "",
-                    photo = it["photo"] as? String ?: ""
+                    photo = it["photo"] as? String ?: "",
+                    celphone = it["celphone"] as? String ?: ""
                 )
             }
         }
@@ -274,7 +275,8 @@ fun ConnectPeopleSection(
                                         uid = document.getString("uid") ?: document.id,
                                         name = document.getString("name") ?: "",
                                         contactId = document.getString("contactId") ?: "",
-                                        photo = document.getString("photo") ?: ""
+                                        photo = document.getString("photo") ?: "",
+                                        celphone = document.getString("celphone") ?: ""
                                     )
                                 } else {
                                     noEncontrado = true
@@ -348,7 +350,8 @@ fun ConnectPeopleSection(
                                     "uid" to usuario.uid,
                                     "name" to usuario.name,
                                     "contactId" to usuario.contactId,
-                                    "photo" to usuario.photo
+                                    "photo" to usuario.photo,
+                                    "celphone" to usuario.celphone
                                 )
 
                                 if (yaEsAmigo) {

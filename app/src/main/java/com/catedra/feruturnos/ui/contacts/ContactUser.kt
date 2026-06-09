@@ -5,5 +5,5 @@ data class ContactUser(
     val photo: String = "",
     val name: String = "",
     val contactId: String = "",
-    val celphone: Int = 0
+    val celphone: String = ""
 )

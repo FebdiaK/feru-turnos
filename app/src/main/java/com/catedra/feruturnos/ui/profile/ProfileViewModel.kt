@@ -57,7 +57,7 @@ class ProfileViewModel : ViewModel() {
                         name = it["name"] as? String ?: "",
                         photo = it["photo"] as? String ?: "",
                         contactId = it["contactId"] as? String ?: "",
-                        celphone = (it["celphone"] as? Long)?.toInt() ?: 0
+                        celphone = it["celphone"] as? String ?: ""
                     )
                 }
 
@@ -68,7 +68,7 @@ class ProfileViewModel : ViewModel() {
                     email = document.getString("email") ?: "",
                     address = document.getString("address") ?: "",
                     photo = document.getString("photo") ?: "",
-                    celphone = document.getLong("celphone")?.toInt() ?: 0,
+                    celphone = document.getString("celphone") ?: "",
                     stars = stars.map { it.toInt() },
                     friends = friends
                 )

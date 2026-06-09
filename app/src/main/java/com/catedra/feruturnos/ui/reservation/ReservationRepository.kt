@@ -38,7 +38,8 @@ class ReservationRepository {
 
         val creatorName = userDoc?.getString("name")
             ?: context.getString(R.string.usuario)
-        val creatorPhone = userDoc?.getLong("celphone")  ?: 0L
+        val creatorPhone = userDoc?.getString("celphone")
+            ?: context.getString(R.string.sin_telefono)
 
         val data = hashMapOf(
             "createdAt"               to Timestamp.now(),

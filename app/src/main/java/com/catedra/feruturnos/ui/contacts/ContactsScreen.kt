@@ -91,7 +91,7 @@ fun ContactsScreen(
                                     )
                                 }
 
-                                Text(friend.celphone.toString())
+                                Text(friend.celphone, style = MaterialTheme.typography.bodyMedium)
                             }
 
                             if (isInviting) {
@@ -119,7 +119,7 @@ fun ContactsScreen(
                     .padding(16.dp),
                 enabled = selectedContacts.isNotEmpty()
             ) {
-                Text("Invitar")
+                Text(stringResource(R.string.invitar))
             }
         }
     }

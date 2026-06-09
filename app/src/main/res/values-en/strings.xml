@@ -87,7 +87,10 @@
 
     <string name="reservas">Reservations</string>
     <string name="toca_para_ver_notificaciones">Tap to view your notifications.</string>
+    <string name="invitar">Invite</string>
 
+    <string name="logo">Logo</string>
+    <string name="sin_telefono">No phone</string>
 
     <string name="inicio">Home</string>
     <string name="busqueda">Search</string>

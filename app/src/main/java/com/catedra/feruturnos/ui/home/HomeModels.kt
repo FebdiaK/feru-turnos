@@ -16,7 +16,7 @@ data class Reservation(
     val placeFieldType: String = "",
     val placeName: String = "",
     val reservationCreatorName: String = "",
-    val reservationCreatorPhone: Int = 0,
+    val reservationCreatorPhone: String = "",
     val reservationDay: String = "",
     val reservationHour: String = "",
     val reservationName: String = "",

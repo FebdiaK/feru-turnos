@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -21,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.catedra.feruturnos.R
 import android.graphics.Bitmap
-import androidx.compose.ui.res.stringResource
 import java.io.File
 import java.io.FileOutputStream
 
@@ -32,7 +32,7 @@ fun RegisterScreen(
         email: String,
         password: String,
         name: String,
-        celphone: Int,
+        celphone: String,
         photoUri: Uri?
     ) -> Unit
 ) {
@@ -64,6 +64,7 @@ fun RegisterScreen(
         photoUri = uri
         ocultarError = true
     }
+
     val cameraPreviewLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap ->
@@ -94,7 +95,7 @@ fun RegisterScreen(
     ) {
         Image(
             painter = painterResource(id = R.drawable.logo_medium),
-            contentDescription = "Logo",
+            contentDescription = stringResource(R.string.logo),
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
@@ -110,7 +111,9 @@ fun RegisterScreen(
                 name = it
                 ocultarError = true
             },
-            label = { Text(stringResource(R.string.ingrese_su_nombre_completo)) },
+            label = {
+                Text(stringResource(R.string.ingrese_su_nombre_completo))
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
@@ -118,7 +121,7 @@ fun RegisterScreen(
 
         if (name.isNotBlank() && !nombreValido) {
             Text(
-                text = "Solo se permiten letras",
+                text = stringResource(R.string.solo_se_permiten_letras),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
@@ -134,8 +137,12 @@ fun RegisterScreen(
                 ocultarError = true
                 isRegistering = false
             },
-            label = { Text(stringResource(R.string.ingrese_su_email)) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            label = {
+                Text(stringResource(R.string.ingrese_su_email))
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
@@ -148,7 +155,9 @@ fun RegisterScreen(
                 ocultarError = true
                 isRegistering = false
             },
-            label = { Text(stringResource(R.string.ingrese_su_contrasena)) },
+            label = {
+                Text(stringResource(R.string.ingrese_su_contrasena))
+            },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier
                 .fillMaxWidth()
@@ -162,8 +171,12 @@ fun RegisterScreen(
                 ocultarError = true
                 isRegistering = false
             },
-            label = { Text(stringResource(R.string.ingrese_su_celular)) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            label = {
+                Text(stringResource(R.string.ingrese_su_celular))
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            ),
             isError = celphoneText.isNotBlank() && !celularValido,
             modifier = Modifier
                 .fillMaxWidth()
@@ -172,7 +185,7 @@ fun RegisterScreen(
 
         if (celphoneText.isNotBlank() && !celularValido) {
             Text(
-                text = "Debe tener al menos 10 dígitos",
+                text = stringResource(R.string.debe_tener_al_menos_10_digitos),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
@@ -200,7 +213,9 @@ fun RegisterScreen(
             Button(
                 onClick = {
                     photoPicker.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        PickVisualMediaRequest(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                        )
                     )
                 },
                 enabled = !isRegistering,
@@ -213,7 +228,7 @@ fun RegisterScreen(
         photoUri?.let { uri ->
             AsyncImage(
                 model = uri,
-                contentDescription = "Foto seleccionada",
+                contentDescription = stringResource(R.string.foto_seleccionada),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp)
@@ -231,7 +246,7 @@ fun RegisterScreen(
                     email,
                     password,
                     name,
-                    celphone ?: 0,
+                    celphoneText,
                     photoUri
                 )
             },

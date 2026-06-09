@@ -65,7 +65,7 @@ class AuthViewModel : ViewModel() {
         email: String,
         password: String,
         name: String,
-        celphone: Int,
+        celphone: String,
         photoUri: Uri?
     ) {
         viewModelScope.launch {
