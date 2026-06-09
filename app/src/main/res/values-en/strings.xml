@@ -1,58 +1,58 @@
 <resources>
     <string name="nombre_app">Feru Turnos</string>
 
-    <string name="iniciar_sesion">Login</string>
+    <string name="iniciar_sesion">Log In</string>
     <string name="ingrese_su_email">Enter your email</string>
     <string name="ingrese_su_contrasena">Enter your password</string>
     <string name="ingresar_a_mi_cuenta">Log in to my account</string>
     <string name="registrarme">Register</string>
     <string name="crear_cuenta">Create account</string>
     <string name="ingrese_su_nombre_completo">Enter your full name</string>
-    <string name="ingrese_su_celular">Enter your cellphone number</string>
+    <string name="ingrese_su_celular">Enter your phone number</string>
     <string name="camara">Camera</string>
     <string name="galeria">Gallery</string>
     <string name="foto_seleccionada">Selected photo</string>
     <string name="debe_tener_al_menos_10_digitos">Must have at least 10 digits</string>
     <string name="solo_se_permiten_letras">Only letters are allowed</string>
 
-    <string name="no_tenes_contactos_agregados">"You haven't contacts added"</string>
+    <string name="no_tenes_contactos_agregados">You don\'t have any contacts added</string>
 
     <string name="sin_reservas_actuales">No current reservations</string>
-    <string name="explora_las_canchas_mas_cercanas_y_reserva_tu_turno_al_instante">Explore the nearest courts and book your time instantly.</string>
+    <string name="explora_las_canchas_mas_cercanas_y_reserva_tu_turno_al_instante">Explore the nearest courts and book your spot instantly.</string>
     <string name="buscar">Search</string>
-    <string name="ingrese_el_id_de_contacto">Enter the contact ID</string>
+    <string name="ingrese_el_id_de_contacto">Enter contact ID</string>
     <string name="no_se_ha_encontrado_un_contacto_con_ese_id">No contact found with that ID</string>
-    <string name="reservas_actuales">Current Reservations</string>
+    <string name="reservas_actuales">Current reservations</string>
     <string name="buscando_donde_jugar">Looking for a place to play?</string>
     <string name="conectar_con_personas">Connect with people</string>
 
-    <string name="predio_sin_nombre">Unnamed property</string>
-    <string name="para_ver_los_predios_mas_cercanos_necesitas_habilitar_el_acceso_a_tu_ubicacion">To see the nearest properties, you need to enable access to your location.</string>
+    <string name="predio_sin_nombre">Unnamed sports complex</string>
+    <string name="para_ver_los_predios_mas_cercanos_necesitas_habilitar_el_acceso_a_tu_ubicacion">To see the nearest sports complexes, you need to enable location access.</string>
     <string name="habilitar_ubicacion">Enable location</string>
     <string name="obteniendo_tu_ubicacion">Getting your location...</string>
-    <string name="buscar_predio_o_deporte">Search for property or sport...</string>
-    <string name="predios_mas_cercanos_a_vos">Properties closest to you</string>
-    <string name="predios_disponibles">Available properties</string>
-    <string name="no_se_encontraron_predios">No properties found</string>
+    <string name="buscar_predio_o_deporte">Search for a complex or sport...</string>
+    <string name="predios_mas_cercanos_a_vos">Complexes closest to you</string>
+    <string name="predios_disponibles">Available complexes</string>
+    <string name="no_se_encontraron_predios">No complexes found</string>
     <string name="a_x_km_de_tu_ubicacion">%1$.1f km from your location</string>
     <string name="servicios">Services</string>
-    <string name="sin_servicios_informados">No services reported</string>
+    <string name="sin_servicios_informados">No services listed</string>
     <string name="canchas">Courts</string>
-    <string name="ir_a_reservar">Go to reservation</string>
-    <string name="predio_cercano">"Nearby property</string>
+    <string name="ir_a_reservar">Go to book</string>
+    <string name="predio_cercano">Nearby complex</string>
     <string name="tu_ubicacion">You are here</string>
     <string name="estas_aca">Your location</string>
     <string name="cerrar_sesion">Log out</string>
     <string name="cancelar">Cancel</string>
     <string name="seguro_que_queres_cerrar_sesion">Are you sure you want to log out?</string>
     <string name="confirmar">Confirm</string>
-    <string name="volver">Return</string>
+    <string name="volver">Back</string>
     <string name="nueva_invitacion">New invitation</string>
-    <string name="fuiste_invitado_a_una_reserva">You were invited to a reservation.</string>
+    <string name="fuiste_invitado_a_una_reserva">You have been invited to a reservation.</string>
 
     <string name="no_se_encontro_la_reserva">Reservation not found</string>
     <string name="reserva_cancelada">Reservation canceled</string>
-    <string name="mensaje_reserva_cancelada">Reservation for %1$s at %2$s has been canceled.</string>
+    <string name="mensaje_reserva_cancelada">The reservation for %1$s at %2$s has been canceled.</string>
     <string name="cancha">Court</string>
     <string name="precio_total">Total price</string>
     <string name="fecha_y_hora">Date and time</string>
@@ -60,55 +60,57 @@
     <string name="participantes">Participants</string>
     <string name="todavia_no_hay_participantes_invitados">There are no invited participants yet.</string>
     <string name="invitar_contactos">Invite contacts</string>
-    <string name="reserva_eliminada_correctamente">Reservation successfully deleted</string>
-    <string name="baja_ejecutada_correctamente">Cancellation successfully completed</string>
+    <string name="reserva_eliminada_correctamente">Reservation deleted successfully</string>
+    <string name="baja_ejecutada_correctamente">Successfully removed from reservation</string>
     <string name="cancelar_reserva">Cancel reservation</string>
-    <string name="darse_de_baja">Cancel reservation</string>
+    <string name="darse_de_baja">Leave reservation</string>
     <string name="no_hay_sesion_activa">There is no active session</string>
     <string name="usuario">User</string>
     <string name="reserva_creada_con_exito">Reservation created successfully</string>
-    <string name="mensaje_reserva_creada">Your reservation at %1$s for %2$s on %3$s at %4$s was created successfully.</string>
+    <string name="mensaje_reserva_creada">Your reservation at %1$s for %2$s on %3$s at %4$s was successfully created.</string>
 
-    <string name="no_se_encontro_el_predio">Property not found</string>
-    <string name="nombre_de">Reservation of</string>
+    <string name="no_se_encontro_el_predio">Sports complex not found</string>
+    <string name="nombre_de">Reservation for</string>
     <string name="confirmar_reserva">Confirm reservation</string>
     <string name="dia">Day</string>
-    <string name="horario">Schedule</string>
+    <string name="horario">Time slot</string>
     <string name="total">Total</string>
     <string name="reserva_de">Reservation by</string>
+
     <string name="nombre_reserva">Reservation name</string>
+    <string name="invitar">Invite</string>
 
     <string name="reserva_creada_correctamente">Reservation created successfully!</string>
     <string name="error_crear_reserva">Could not create the reservation</string>
     <string name="error">Error: %1$s</string>
 
-    <string name="elegi_una_cancha">Choose a field</string>
+    <string name="elegi_una_cancha">Choose a court</string>
     <string name="resumen_reserva">Reservation summary</string>
 
     <string name="reservas">Reservations</string>
     <string name="toca_para_ver_notificaciones">Tap to view your notifications.</string>
-    <string name="invitar">Invite</string>
 
     <string name="logo">Logo</string>
-    <string name="sin_telefono">No phone</string>
+    <string name="sin_telefono">No phone number</string>
     <string name="seguro_que_queres_cancelar_reserva">Are you sure you want to cancel this reservation?</string>
     <string name="seguro_que_queres_darte_de_baja">Are you sure you want to leave this reservation?</string>
 
+    <string name="contacto_agregado_correctamente">Contact added successfully</string>
+    <string name="contacto_eliminado_correctamente">Contact removed successfully</string>
+    <string name="error_al_actualizar_contacto">Could not update contact</string>
     <string name="inicio">Home</string>
     <string name="busqueda">Search</string>
-    <string name="predio">Place</string>
+    <string name="predio">Complex</string>
     <string name="perfil">Profile</string>
     <string name="configuracion">Settings</string>
     <string name="contactos">Contacts</string>
     <string name="notificaciones">Notifications</string>
-    <string name="reserva">Reserve</string>
+    <string name="reserva">Reservation</string>
     <string name="selecciona_un_contacto">Select a contact</string>
 
-    <string name="contacto_agregado_correctamente">Contact added successfully</string>
-    <string name="contacto_eliminado_correctamente">Contact removed successfully</string>
-    <string name="error_al_actualizar_contacto">Could not update the contact</string>
     <string name="language">Language</string>
     <string name="spanish">Spanish</string>
     <string name="english">English</string>
-    <string name="portugues">Português</string>
+    <string name="portugues">Portuguese</string>
+    <string name="french">French</string>
 </resources>

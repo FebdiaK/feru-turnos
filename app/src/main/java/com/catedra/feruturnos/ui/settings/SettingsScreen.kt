@@ -69,5 +69,19 @@ fun SettingsScreen() {
                 )
             }
         )
+
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.french)) },
+            leadingContent = {
+                RadioButton(
+                    selected = selectedLanguage == "fr",
+                    onClick = {
+                        selectedLanguage = "fr"
+                        LanguagePreferences.saveLanguage(context, "fr")
+                        (context as? Activity)?.recreate()
+                    }
+                )
+            }
+        )
     }
 }
