@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
@@ -13,16 +12,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
@@ -44,6 +44,12 @@ import kotlinx.coroutines.tasks.await
 import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
 
+private val CardShape       = RoundedCornerShape(16.dp)  // forma estándar de cards
+private val ButtonShape     = RoundedCornerShape(14.dp)  // forma estándar de botones
+private val ButtonHeight    = 52.dp                      // altura estándar de botones
+private val ElevationLow    = 2.dp   // cards secundarias
+private val ElevationMedium = 4.dp   // card principal
+
 @Composable
 fun ReservationDetailScreen(
     reservationId: String,
@@ -62,10 +68,7 @@ fun ReservationDetailScreen(
     LaunchedEffect(Unit) {
         Configuration.getInstance().apply {
             userAgentValue = context.packageName
-            load(
-                context,
-                context.getSharedPreferences("osm_prefs", Context.MODE_PRIVATE)
-            )
+            load(context, context.getSharedPreferences("osm_prefs", Context.MODE_PRIVATE))
         }
     }
 
@@ -77,9 +80,7 @@ fun ReservationDetailScreen(
                 .get()
                 .await()
 
-            reservation = doc.toObject(Reservation::class.java)?.copy(
-                id = doc.id
-            )
+            reservation = doc.toObject(Reservation::class.java)?.copy(id = doc.id)
 
             val reservationData = reservation
 
@@ -99,7 +100,6 @@ fun ReservationDetailScreen(
                         celphone = userDoc.getString("celphone") ?: ""
                     )
                 }
-
                 participants = users
             }
         } catch (e: Exception) {
@@ -114,9 +114,7 @@ fun ReservationDetailScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.primary
-            )
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
         }
         return
     }
@@ -135,9 +133,7 @@ fun ReservationDetailScreen(
     val isCreator = currentUserId == r.creatorId
     val isCurrentUserParticipant = r.participantsId.contains(currentUserId)
 
-    val mapPoint = r.placeLocation?.let {
-        GeoPoint(it.latitude, it.longitude)
-    }
+    val mapPoint = r.placeLocation?.let { GeoPoint(it.latitude, it.longitude) }
 
     val titleCancelled = stringResource(R.string.reserva_cancelada)
     val messageCancelled = stringResource(
@@ -145,34 +141,21 @@ fun ReservationDetailScreen(
         r.placeFieldType,
         r.placeName
     )
+    val reservationDeletedSuccessfully = stringResource(R.string.reserva_eliminada_correctamente)
+    val leaveSuccessfully = stringResource(R.string.baja_ejecutada_correctamente)
+    val cancelReservationText = stringResource(R.string.cancelar_reserva)
+    val unsubscribeText = stringResource(R.string.darse_de_baja)
 
-    val reservationDeletedSuccessfully =
-        stringResource(R.string.reserva_eliminada_correctamente)
-
-    val leaveSuccessfully =
-        stringResource(R.string.baja_ejecutada_correctamente)
-
-    val cancelReservationText =
-        stringResource(R.string.cancelar_reserva)
-
-    val unsubscribeText =
-        stringResource(R.string.darse_de_baja)
-
-    val tituloDialogoCancelar =
-        if (isCreator) cancelReservationText else unsubscribeText
-
-    val mensajeDialogoCancelar =
-        if (isCreator) {
-            stringResource(R.string.seguro_que_queres_cancelar_reserva)
-        } else {
-            stringResource(R.string.seguro_que_queres_darte_de_baja)
-        }
+    val tituloDialogoCancelar = if (isCreator) cancelReservationText else unsubscribeText
+    val mensajeDialogoCancelar = if (isCreator) {
+        stringResource(R.string.seguro_que_queres_cancelar_reserva)
+    } else {
+        stringResource(R.string.seguro_que_queres_darte_de_baja)
+    }
 
     if (mostrarDialogoCancelarReserva) {
         AlertDialog(
-            onDismissRequest = {
-                if (!isCancelling) mostrarDialogoCancelarReserva = false
-            },
+            onDismissRequest = { if (!isCancelling) mostrarDialogoCancelarReserva = false },
             shape = RoundedCornerShape(28.dp),
             title = {
                 Text(
@@ -203,14 +186,10 @@ fun ReservationDetailScreen(
 
                                 if (isCreator) {
                                     val relatedUsers = r.participantsId.map { participantId ->
-                                        mapOf(
-                                            "userId" to participantId,
-                                            "read" to false
-                                        )
+                                        mapOf("userId" to participantId, "read" to false)
                                     }
 
-                                    Firebase.firestore
-                                        .collection("notifications")
+                                    Firebase.firestore.collection("notifications")
                                         .add(
                                             hashMapOf(
                                                 "title" to titleCancelled,
@@ -222,8 +201,7 @@ fun ReservationDetailScreen(
                                         )
                                         .await()
 
-                                    Firebase.firestore
-                                        .collection("reservations")
+                                    Firebase.firestore.collection("reservations")
                                         .document(reservationId)
                                         .delete()
                                         .await()
@@ -238,14 +216,9 @@ fun ReservationDetailScreen(
                                         return@launch
                                     }
 
-                                    Firebase.firestore
-                                        .collection("reservations")
+                                    Firebase.firestore.collection("reservations")
                                         .document(reservationId)
-                                        .update(
-                                            mapOf(
-                                                "participantsId" to FieldValue.arrayRemove(uid)
-                                            )
-                                        )
+                                        .update(mapOf("participantsId" to FieldValue.arrayRemove(uid)))
                                         .await()
 
                                     mostrarDialogoCancelarReserva = false
@@ -258,15 +231,16 @@ fun ReservationDetailScreen(
                         }
                     },
                     enabled = !isCancelling,
+                    shape = ButtonShape,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Red,
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
                     )
                 ) {
                     if (isCancelling) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onError,
                             strokeWidth = 2.dp
                         )
                     } else {
@@ -277,9 +251,8 @@ fun ReservationDetailScreen(
         )
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Column(modifier = Modifier.fillMaxSize()) {
+
         if (mapPoint != null) {
             FixedReservationMap(
                 mapPoint = mapPoint,
@@ -296,16 +269,13 @@ fun ReservationDetailScreen(
                 .fillMaxWidth()
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(
-                    topStart = 0.dp,
-                    topEnd = 0.dp,
-                    bottomStart = 16.dp,
-                    bottomEnd = 16.dp
-                ),
+                shape = CardShape,
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
@@ -314,83 +284,103 @@ fun ReservationDetailScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(
-                            horizontal = 20.dp,
-                            vertical = 16.dp
-                        )
+                        .padding(horizontal = 20.dp, vertical = 16.dp)
                 ) {
                     Text(
                         text = r.placeName,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         style = MaterialTheme.typography.headlineSmall
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = r.placeAddress,
-                        color = Color.White.copy(alpha = 0.85f),
+                        "📍 ${r.placeAddress}",
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Card(
+         Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                elevation = CardDefaults.cardElevation(4.dp)
+                shape = CardShape,
+                elevation = CardDefaults.cardElevation(ElevationMedium)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
-                    DetailRow(
+
+                    DetailItem(
                         icon = Icons.Default.LocationOn,
-                        title = stringResource(R.string.cancha),
-                        value = r.placeFieldType
+                        label = stringResource(R.string.cancha),
+                        value = r.placeFieldType,
+                        valueStyle = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Normal
+                        )
                     )
 
-                    DetailRow(
-                        icon = Icons.Default.AttachMoney,
-                        title = stringResource(R.string.precio_total),
-                        value = "$${r.placeFieldPrice}"
-                    )
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    DetailRow(
-                        icon = Icons.Default.CalendarMonth,
-                        title = stringResource(R.string.fecha_y_hora),
-                        value = "${r.reservationDay} - ${r.reservationHour} hs"
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        DetailItem(
+                            icon = Icons.Default.CalendarMonth,
+                            label = stringResource(R.string.fecha_y_hora),
+                            value = "${r.reservationDay} · ${r.reservationHour} hs",
+                            modifier = Modifier.weight(1f)
+                        )
+                        DetailItem(
+                            icon = Icons.Default.AttachMoney,
+                            label = stringResource(R.string.precio_total),
+                            value = "${r.placeFieldPrice}",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
 
-                    DetailRow(
-                        icon = Icons.Default.Person,
-                        title = stringResource(R.string.creador),
-                        value = "${r.reservationCreatorName} · Tel: ${r.reservationCreatorPhone}"
-                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        DetailItem(
+                            icon = Icons.Default.Person,
+                            label = stringResource(R.string.creador),
+                            value = r.reservationCreatorName,
+                            muted = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                        DetailItem(
+                            icon = Icons.Default.Phone,
+                            label = stringResource(R.string.telefono),
+                            value = "${r.reservationCreatorPhone}",
+                            muted = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
             Text(
                 text = stringResource(R.string.participantes),
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleMedium
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             if (participants.isEmpty()) {
                 Text(
                     text = stringResource(R.string.todavia_no_hay_participantes_invitados),
-                    color = Color.Gray
+
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
                 participants.forEach { participant ->
+
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        elevation = CardDefaults.cardElevation(2.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = CardShape,
+                        elevation = CardDefaults.cardElevation(ElevationLow)
                     ) {
                         Row(
                             modifier = Modifier.padding(14.dp),
@@ -412,17 +402,15 @@ fun ReservationDetailScreen(
                                     text = participant.name,
                                     style = MaterialTheme.typography.titleMedium
                                 )
-
                                 Text(
                                     text = "#${participant.contactId}",
-                                    color = Color.Gray,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     style = MaterialTheme.typography.bodySmall
                                 )
-
                                 if (participant.celphone.isNotBlank()) {
                                     Text(
                                         text = participant.celphone,
-                                        color = Color.Gray,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         style = MaterialTheme.typography.bodySmall
                                     )
                                 }
@@ -432,53 +420,44 @@ fun ReservationDetailScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Button(
+              Button(
                 onClick = { onNavigateToContacts(reservationId) },
                 enabled = isCreator || isCurrentUserParticipant,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(14.dp),
+                    .height(ButtonHeight),
+                shape = ButtonShape,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = Color.White
+                    contentColor = MaterialTheme.colorScheme.onSecondary
                 )
             ) {
                 Icon(
                     imageVector = Icons.Default.GroupAdd,
                     contentDescription = null
                 )
-
                 Spacer(modifier = Modifier.width(8.dp))
-
                 Text(stringResource(R.string.invitar_contactos))
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
-
             Button(
-                onClick = {
-                    mostrarDialogoCancelarReserva = true
-                },
+                onClick = { mostrarDialogoCancelarReserva = true },
                 enabled = !isCancelling && (isCreator || isCurrentUserParticipant),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(14.dp),
+                    .height(ButtonHeight),
+                shape = ButtonShape,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Red,
-                    contentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
                 )
             ) {
-                val deleteTextBtn =
-                    if (isCreator) cancelReservationText else unsubscribeText
+                val deleteTextBtn = if (isCreator) cancelReservationText else unsubscribeText
 
                 if (isCancelling) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onError,
                         strokeWidth = 2.dp
                     )
                 } else {
@@ -501,13 +480,9 @@ fun FixedReservationMap(
         zoom = 16.0
     }
 
-    val markerState = rememberMarkerState(
-        geoPoint = mapPoint
-    )
+    val markerState = rememberMarkerState(geoPoint = mapPoint)
 
-    Box(
-        modifier = modifier.clipToBounds()
-    ) {
+    Box(modifier = modifier.clipToBounds()) {
         OpenStreetMap(
             modifier = Modifier.fillMaxSize(),
             cameraState = cameraState,
@@ -541,36 +516,47 @@ fun FixedReservationMap(
 }
 
 @Composable
-fun DetailRow(
+private fun DetailItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    value: String
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    muted: Boolean = false,
+    valueStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyLarge
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(26.dp)
+    val contentColor = if (muted) {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.width(14.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
-        Column {
-            Text(
-                text = title,
-                color = Color.Gray,
-                style = MaterialTheme.typography.bodySmall
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (muted) {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.secondary
+                },
+                modifier = Modifier.size(18.dp)
             )
+
+            Spacer(modifier = Modifier.width(6.dp))
 
             Text(
                 text = value,
-                style = MaterialTheme.typography.bodyLarge
+                style = valueStyle,
+                color = contentColor
             )
         }
     }

@@ -8,8 +8,10 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material3.CardDefaults.cardElevation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +31,12 @@ import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import org.osmdroid.util.GeoPoint
+
+private val CardShape       = RoundedCornerShape(16.dp)
+private val ButtonShape     = RoundedCornerShape(14.dp)
+private val ButtonHeight    = 52.dp
+private val ElevationLow    = 2.dp
+private val ElevationMedium = 4.dp
 
 @Composable
 fun EnclosureDetailScreen(
@@ -152,8 +160,6 @@ fun EnclosureDetailContent(
 
     LaunchedEffect(Unit) {
         val uid = auth?.currentUser?.uid
-        android.util.Log.d("ENCLOSURE_DEBUG", "uid en composable: $uid")
-
         if (uid == null) return@LaunchedEffect
 
         try {
@@ -163,18 +169,11 @@ fun EnclosureDetailContent(
                 .get()
                 .await()
 
-            android.util.Log.d("ENCLOSURE_DEBUG", "docs encontrados: ${userQuery.documents.size}")
-            android.util.Log.d(
-                "ENCLOSURE_DEBUG",
-                "name: ${userQuery.documents.firstOrNull()?.getString("name")}"
-            )
-
             val name = userQuery.documents.firstOrNull()?.getString("name")
                 ?: userFallbackText
 
             reservationName = "$reservationOfText: $name"
         } catch (e: Exception) {
-            android.util.Log.e("ENCLOSURE_DEBUG", "error: ${e.message}")
             reservationName = "$reservationOfText: $userFallbackText"
         }
     }
@@ -192,11 +191,9 @@ fun EnclosureDetailContent(
             reservedSlots = snapshot.documents.mapNotNull { doc ->
                 val fieldId = doc.getString("fieldId") ?: return@mapNotNull null
                 val day = doc.getString("reservationDay") ?: return@mapNotNull null
-
                 val hour = doc.getString("reservationHour")
                     ?: doc.getString("reservationTime")
                     ?: return@mapNotNull null
-
                 "$fieldId|$day|$hour"
             }.toSet()
 
@@ -207,11 +204,13 @@ fun EnclosureDetailContent(
 
     if (showConfirmDialog && selectedField != null && selectedDay != null && selectedHour != null) {
         AlertDialog(
-            onDismissRequest = {
-                if (!isLoading) showConfirmDialog = false
-            },
+            onDismissRequest = { if (!isLoading) showConfirmDialog = false },
+            shape = RoundedCornerShape(28.dp),
             title = {
-                Text(stringResource(R.string.confirmar_reserva))
+                Text(
+                    text = stringResource(R.string.confirmar_reserva),
+                    style = MaterialTheme.typography.headlineSmall
+                )
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -219,17 +218,14 @@ fun EnclosureDetailContent(
                         label = stringResource(R.string.cancha),
                         value = "${selectedField!!.fieldName} — ${selectedField!!.type}"
                     )
-
                     SummaryRow(
                         label = stringResource(R.string.dia),
                         value = selectedDay!!.replaceFirstChar { it.uppercase() }
                     )
-
                     SummaryRow(
                         label = stringResource(R.string.horario),
                         value = "$selectedHour:00 hs"
                     )
-
                     SummaryRow(
                         label = stringResource(R.string.total),
                         value = "$${selectedField!!.price}"
@@ -240,9 +236,7 @@ fun EnclosureDetailContent(
                     OutlinedTextField(
                         value = reservationName,
                         onValueChange = { reservationName = it },
-                        label = {
-                            Text(stringResource(R.string.nombre_reserva))
-                        },
+                        label = { Text(stringResource(R.string.nombre_reserva)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -251,10 +245,10 @@ fun EnclosureDetailContent(
             confirmButton = {
                 Button(
                     enabled = !isLoading,
+                    shape = ButtonShape,
                     onClick = {
                         scope.launch {
                             isLoading = true
-
                             try {
                                 val id = repository.createReservation(
                                     context = context,
@@ -264,21 +258,13 @@ fun EnclosureDetailContent(
                                     selectedHour = selectedHour!!,
                                     reservationName = reservationName
                                 )
-
                                 mostrarNotificacionReservaCreada(context, id)
-
                                 showConfirmDialog = false
-
-                                snackbarHostState.showSnackbar(
-                                    reservationCreatedText
-                                )
-
+                                snackbarHostState.showSnackbar(reservationCreatedText)
                                 onReservationCreated(id)
                             } catch (e: Exception) {
                                 snackbarHostState.showSnackbar(
-                                    e.message?.let { message ->
-                                        errorTemplate.format(message)
-                                    } ?: errorText
+                                    e.message?.let { msg -> errorTemplate.format(msg) } ?: errorText
                                 )
                             } finally {
                                 isLoading = false
@@ -316,9 +302,10 @@ fun EnclosureDetailContent(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Card(
+                Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(2.dp)
+                shape = CardShape,
+                elevation = cardElevation(ElevationMedium)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -364,9 +351,7 @@ fun EnclosureDetailContent(
                                 AssistChip(
                                     onClick = {},
                                     enabled = false,
-                                    label = {
-                                        Text(amenity)
-                                    }
+                                    label = { Text(amenity) }
                                 )
                             }
                         }
@@ -374,7 +359,7 @@ fun EnclosureDetailContent(
                 }
             }
 
-            Text(
+                Text(
                 text = stringResource(R.string.elegi_una_cancha),
                 style = MaterialTheme.typography.titleMedium
             )
@@ -403,6 +388,7 @@ fun EnclosureDetailContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(fieldCardHeight),
+                        shape = CardShape,
                         border = if (isSelected) {
                             CardDefaults.outlinedCardBorder().copy(width = 2.dp)
                         } else {
@@ -415,7 +401,7 @@ fun EnclosureDetailContent(
                                 MaterialTheme.colorScheme.surface
                             }
                         ),
-                        elevation = CardDefaults.cardElevation(
+                        elevation = cardElevation(
                             if (isSelected) 0.dp else 2.dp
                         )
                     ) {
@@ -430,7 +416,6 @@ fun EnclosureDetailContent(
                                     text = field.fieldName,
                                     style = MaterialTheme.typography.labelLarge
                                 )
-
                                 Text(
                                     text = field.type,
                                     style = MaterialTheme.typography.bodySmall,
@@ -491,18 +476,10 @@ fun EnclosureDetailContent(
                         FilterChip(
                             selected = selectedHour == hour,
                             enabled = !isReserved,
-                            onClick = {
-                                if (!isReserved) {
-                                    selectedHour = hour
-                                }
-                            },
+                            onClick = { if (!isReserved) selectedHour = hour },
                             label = {
                                 Text(
-                                    text = if (isReserved) {
-                                        "$hour:00 - Reservado"
-                                    } else {
-                                        "$hour:00"
-                                    },
+                                    text = if (isReserved) "$hour:00 - Reservado" else "$hour:00",
                                     textAlign = TextAlign.Center,
                                     maxLines = 1
                                 )
@@ -512,9 +489,10 @@ fun EnclosureDetailContent(
                 }
 
                 if (selectedDay != null && selectedHour != null) {
-                    Card(
+                             Card(
                         modifier = Modifier.fillMaxWidth(),
-                        elevation = CardDefaults.cardElevation(2.dp)
+                        shape = CardShape,
+                        elevation = cardElevation(ElevationMedium)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
@@ -528,16 +506,12 @@ fun EnclosureDetailContent(
                                 label = stringResource(R.string.cancha),
                                 value = "${field.fieldName} — ${field.type}"
                             )
-
                             HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
-
                             SummaryRow(
                                 label = stringResource(R.string.dia),
                                 value = selectedDay!!.replaceFirstChar { it.uppercase() }
                             )
-
                             HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
-
                             SummaryRow(
                                 label = stringResource(R.string.horario),
                                 value = "$selectedHour:00 hs"
@@ -556,7 +530,10 @@ fun EnclosureDetailContent(
 
                     Button(
                         onClick = { showConfirmDialog = true },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(ButtonHeight),
+                        shape = ButtonShape
                     ) {
                         Text(stringResource(R.string.confirmar_reserva))
                     }
@@ -586,7 +563,6 @@ private fun SummaryRow(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium
@@ -606,7 +582,6 @@ private fun mostrarNotificacionReservaCreada(
             context.getString(R.string.reservas),
             android.app.NotificationManager.IMPORTANCE_HIGH
         )
-
         val manager = context.getSystemService(android.app.NotificationManager::class.java)
         manager.createNotificationChannel(channel)
     }
@@ -655,45 +630,22 @@ private val previewEnclosure = EnclosureItem(
     name = "Padel Vida Viva",
     address = "Río Salado 5228, Ezpeleta",
     phone = 42348888,
-    location = GeoPoint(
-        -34.7493861,
-        -58.2497394
-    ),
-    amenities = listOf(
-        "Buffet",
-        "Estacionamiento",
-        "Vestuarios"
-    ),
+    location = GeoPoint(-34.7493861, -58.2497394),
+    amenities = listOf("Buffet", "Estacionamiento", "Vestuarios"),
     fields = listOf(
         FieldItem(
             id = "cancha_1",
             fieldName = "Cancha número 1",
             type = "Paddel",
             price = 5000,
-            days = listOf(
-                "lunes",
-                "martes",
-                "miercoles",
-                "sábado",
-                "domingo"
-            ),
-            timeTable = listOf(
-                "10",
-                "11",
-                "14",
-                "15",
-                "16",
-                "17"
-            ),
+            days = listOf("lunes", "martes", "miercoles", "sábado", "domingo"),
+            timeTable = listOf("10", "11", "14", "15", "16", "17"),
             description = "Cancha techada con iluminación LED"
         )
     )
 )
 
-@Preview(
-    showBackground = true,
-    showSystemUi = true
-)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun EnclosureDetailContentPreview() {
     EnclosureDetailContent(

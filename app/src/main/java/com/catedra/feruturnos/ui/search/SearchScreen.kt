@@ -296,7 +296,7 @@ fun RequestLocationPermissionBox(
         ) {
             Text(
                 text = "📍",
-                style = MaterialTheme.typography.displaySmall
+                style = MaterialTheme.typography.headlineMedium
             )
 
             Spacer(modifier = Modifier.height(8.dp))
