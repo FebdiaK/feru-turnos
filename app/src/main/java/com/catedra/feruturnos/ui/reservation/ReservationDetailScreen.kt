@@ -261,7 +261,9 @@ fun ReservationDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(230.dp)
+                    .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
             )
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         Column(
@@ -419,49 +421,51 @@ fun ReservationDetailScreen(
                     }
                 }
             }
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 
-              Button(
-                onClick = { onNavigateToContacts(reservationId) },
-                enabled = isCreator || isCurrentUserParticipant,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(ButtonHeight),
-                shape = ButtonShape,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.GroupAdd,
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.invitar_contactos))
-            }
-
-            Button(
-                onClick = { mostrarDialogoCancelarReserva = true },
-                enabled = !isCancelling && (isCreator || isCurrentUserParticipant),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(ButtonHeight),
-                shape = ButtonShape,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
-                )
-            ) {
-                val deleteTextBtn = if (isCreator) cancelReservationText else unsubscribeText
-
-                if (isCancelling) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onError,
-                        strokeWidth = 2.dp
+                Button(
+                    onClick = { onNavigateToContacts(reservationId) },
+                    enabled = isCreator || isCurrentUserParticipant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ButtonHeight),
+                    shape = ButtonShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
                     )
-                } else {
-                    Text(deleteTextBtn)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.GroupAdd,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(stringResource(R.string.invitar_contactos))
+                }
+
+                Button(
+                    onClick = { mostrarDialogoCancelarReserva = true },
+                    enabled = !isCancelling && (isCreator || isCurrentUserParticipant),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ButtonHeight),
+                    shape = ButtonShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    )
+                ) {
+                    val deleteTextBtn = if (isCreator) cancelReservationText else unsubscribeText
+
+                    if (isCancelling) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.onError,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(deleteTextBtn)
+                    }
                 }
             }
         }
