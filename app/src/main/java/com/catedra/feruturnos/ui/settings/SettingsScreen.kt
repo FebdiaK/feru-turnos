@@ -50,7 +50,6 @@ fun SettingsScreen() {
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Renderizado dinámico y limpio mediante un bucle
         languages.forEach { (langCode, stringResId) ->
             ListItem(
                 headlineContent = {
@@ -62,7 +61,7 @@ fun SettingsScreen() {
                 leadingContent = {
                     RadioButton(
                         selected = selectedLanguage == langCode,
-                        onClick = null // Dejamos en null para que no intercepte el click de la fila completa
+                        onClick = null
                     )
                 },
                 modifier = Modifier
@@ -76,68 +75,4 @@ fun SettingsScreen() {
             )
         }
     }
-
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(16.dp)
-//    ) {
-//        Text(stringResource(R.string.language))
-//
-//        ListItem(
-//            headlineContent = { Text(stringResource(R.string.spanish)) },
-//            leadingContent = {
-//                RadioButton(
-//                    selected = selectedLanguage == "es",
-//                    onClick = {
-//                        selectedLanguage = "es"
-//                        LanguagePreferences.saveLanguage(context, "es")
-//                        (context as? Activity)?.recreate()
-//                    }
-//                )
-//            }
-//        )
-//
-//        ListItem(
-//            headlineContent = { Text(stringResource(R.string.english)) },
-//            leadingContent = {
-//                RadioButton(
-//                    selected = selectedLanguage == "en",
-//                    onClick = {
-//                        selectedLanguage = "en"
-//                        LanguagePreferences.saveLanguage(context, "en")
-//                        (context as? Activity)?.recreate()
-//                    }
-//                )
-//            }
-//        )
-//
-//        ListItem(
-//            headlineContent = { Text(stringResource(R.string.portugues)) },
-//            leadingContent = {
-//                RadioButton(
-//                    selected = selectedLanguage == "pt",
-//                    onClick = {
-//                        selectedLanguage = "pt"
-//                        LanguagePreferences.saveLanguage(context, "pt")
-//                        (context as? Activity)?.recreate()
-//                    }
-//                )
-//            }
-//        )
-//
-//        ListItem(
-//            headlineContent = { Text(stringResource(R.string.french)) },
-//            leadingContent = {
-//                RadioButton(
-//                    selected = selectedLanguage == "fr",
-//                    onClick = {
-//                        selectedLanguage = "fr"
-//                        LanguagePreferences.saveLanguage(context, "fr")
-//                        (context as? Activity)?.recreate()
-//                    }
-//                )
-//            }
-//        )
-//    }
 }

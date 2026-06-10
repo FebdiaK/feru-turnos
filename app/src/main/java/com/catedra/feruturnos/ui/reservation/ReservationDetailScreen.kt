@@ -44,11 +44,11 @@ import kotlinx.coroutines.tasks.await
 import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
 
-private val CardShape       = RoundedCornerShape(16.dp)  // forma estándar de cards
-private val ButtonShape     = RoundedCornerShape(14.dp)  // forma estándar de botones
-private val ButtonHeight    = 52.dp                      // altura estándar de botones
-private val ElevationLow    = 2.dp   // cards secundarias
-private val ElevationMedium = 4.dp   // card principal
+private val CardShape       = RoundedCornerShape(16.dp)
+private val ButtonShape     = RoundedCornerShape(14.dp)
+private val ButtonHeight    = 52.dp
+private val ElevationLow    = 2.dp
+private val ElevationMedium = 4.dp
 
 @Composable
 fun ReservationDetailScreen(
